@@ -10,11 +10,12 @@ function create(o,bounds){
   const w=new BrowserWindow({width:o.width,height:o.height,minWidth:o.minWidth,minHeight:o.minHeight,frame:o.frame,alwaysOnTop:!!o.alwaysOnTop,transparent:!!o.transparent,resizable:o.resizable!==false,hasShadow:o.hasShadow!==false,
     backgroundColor:o.transparent?'#00000000':'#05090f',autoHideMenuBar:true,icon:path.join(__dirname,'build','icon.png'),show:false,
     ...(bounds?{x:bounds.x,y:bounds.y}:{}),
-    webPreferences:{preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false,backgroundThrottling:false}});
+    webPreferences:{preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false,backgroundThrottling:false,autoplayPolicy:'no-user-gesture-required'}});
   if(o.alwaysOnTop)w.setAlwaysOnTop(true,'screen-saver');
   w.setMenuBarVisibility(false);
   w.loadFile(path.join(__dirname,'app','index.html'));
   w.once('ready-to-show',()=>{w.show();if(old&&!old.isDestroyed()){old.removeAllListeners('closed');old.destroy();}});
+  w.on('hide',()=>{try{w.webContents.send('win-vis',false);}catch(_){}});w.on('show',()=>{try{w.webContents.send('win-vis',true);}catch(_){}});
   w.on('close',e=>{if(!app.quitting&&tray){e.preventDefault();w.hide();}});
   w.webContents.setWindowOpenHandler(({url})=>{if(/^https:/.test(url))shell.openExternal(url);return {action:'deny'};});
   w.webContents.on('will-navigate',(e,url)=>{if(!url.startsWith('file:')){e.preventDefault();if(/^https:/.test(url))shell.openExternal(url);}});

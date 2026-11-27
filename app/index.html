@@ -496,7 +496,7 @@ let bubT=0;
 function gibLike(s){const c='abcdefghklmnpqrstuvwxyzCDKXH&&**^^!!#%@~$?+=<>/';return s.replace(/[^ .,:]/g,()=>c[Math.random()*c.length|0]);}
 function gib(n){const c='abcdefghklmnpqrstuvwxyzCDKXH&&**^^!!#%@~$?+=<>/';let s='';for(let i=0;i<n;i++)s+=c[Math.random()*c.length|0];return s;}
 let typT=0;
-function sentBubble(title,body){const b=$('#bub');clearInterval(typT);b.innerHTML='';const k=document.createElement('b');k.textContent='LAYLAPS:';const tx=document.createElement('div');tx.className='al2';b.append(k,tx);
+function sentBubble(title,body){if(window.lsBeep)window.lsBeep();const b=$('#bub');clearInterval(typT);b.innerHTML='';const k=document.createElement('b');k.textContent='LAYLAPS:';const tx=document.createElement('div');tx.className='al2';b.append(k,tx);
  const msg=title.toUpperCase()+'. '+body,g=gibLike(msg);
  const hide=()=>{clearInterval(typT);clearTimeout(bubT);b.hidden=true;window.compGrow&&window.compGrow(false);};window.compGrow&&window.compGrow(true);b.hidden=false;
  const sn=$('#sent');sn.classList.remove('ping');void sn.offsetWidth;sn.classList.add('ping');clearTimeout(bubT);b.onclick=hide;
@@ -730,6 +730,22 @@ renderRules();renderRecent();renderDial();renderExp();renderLog();
    setView(localStorage.getItem('nmsc_mview')||'exp');}
   else if(mode==='comp'){document.body.classList.add('comp');$('#comp').hidden=false;
    await applyOpt('comp');
+   // Laylaps sounds: quiet hover loop with random beeps, switchable from the Laylaps menu
+   const SND={on:()=>LS.get('nmsc_lsound',true)};
+   const mkA=(f,l)=>{const a=new Audio('sounds/'+f);a.loop=!!l;a.volume=0;a.preload='auto';return a;};
+   const hA=mkA('hover-a.ogg',1),hB=mkA('hover-b.ogg',1),bps=[1,2,3].map(n=>mkA('beep-'+n+'.ogg',0));
+   const HV=.3,BV=.5;let cur=hA,running=false,vis=true,tSwap=null,tBeep=null;
+   const fade=(a,to,ms)=>{clearInterval(a._f);const from=a.volume,st=Date.now();a._f=setInterval(()=>{const k=Math.min(1,(Date.now()-st)/ms);a.volume=Math.max(0,Math.min(1,from+(to-from)*k));if(k>=1){clearInterval(a._f);if(to===0)a.pause();}},50);};
+   const rnd=(a,b)=>a+Math.random()*(b-a);
+   const beep=()=>{if(!running)return;const b=bps[Math.floor(Math.random()*bps.length)];try{b.currentTime=0;b.volume=BV;b.play().catch(()=>{});}catch(e){}};
+   const nextBeep=()=>{clearTimeout(tBeep);if(running)tBeep=setTimeout(()=>{beep();nextBeep();},rnd(12000,35000));};
+   const nextSwap=()=>{clearTimeout(tSwap);if(running)tSwap=setTimeout(()=>{const o=cur===hA?hB:hA;fade(cur,0,3000);cur=o;try{o.currentTime=0;o.play().catch(()=>{});}catch(e){}fade(o,HV,3000);nextSwap();},rnd(90000,150000));};
+   const startSnd=()=>{if(running||!SND.on()||!vis)return;running=true;try{cur.play().catch(()=>{});}catch(e){}fade(cur,HV,1500);nextSwap();nextBeep();};
+   const stopSnd=()=>{running=false;clearTimeout(tSwap);clearTimeout(tBeep);fade(hA,0,500);fade(hB,0,500);};
+   window.lsBeep=()=>beep();
+   window.nmscBridge.on('win-vis',v=>{vis=!!v;if(vis)startSnd();else stopSnd();});
+   window.addEventListener('beforeunload',()=>{try{hA.pause();hB.pause();}catch(e){}});
+   startSnd();
    const openView=async v=>{localStorage.setItem('nmsc_mview',v);await setMode('float');};
    const applySize=async z=>{csz=z;localStorage.setItem('nmsc_csize',z);document.documentElement.style.setProperty('--cs',CS[z].i+'px');grown=false;try{await desktop.window.place({width:CS[z].w,height:CS[z].h});}catch(e){}if(window.compSet)window.compSet(null);};
    document.documentElement.style.setProperty('--cs',CS[csz].i+'px');
@@ -740,7 +756,7 @@ renderRules();renderRecent();renderDial();renderExp();renderLog();
    const menu=async()=>{try{await desktop.Menu.popup([
      {label:'Expedition',click:()=>openView('exp')},{label:'Dialer',click:()=>openView('dial')},{label:'Atlas',click:()=>openView('atlas')},{label:'Catalogue',click:()=>openView('note')},{type:'separator'},
      {label:'Size: Small',type:'radio',checked:csz==='s',click:()=>applySize('s')},{label:'Size: Medium',type:'radio',checked:csz==='m',click:()=>applySize('m')},{label:'Size: Large',type:'radio',checked:csz==='l',click:()=>applySize('l')},{type:'separator'},
-     {label:'Show a test alert',click:()=>sentBubble('Expedition alert','Aquarius ends in under 24 hours.')},{label:'Alerts on',type:'checkbox',checked:!LS.get('nmsc_mute',false),click:()=>LS.set('nmsc_mute',!LS.get('nmsc_mute',false))},{type:'separator'},
+     {label:'Show a test alert',click:()=>sentBubble('Expedition alert','Aquarius ends in under 24 hours.')},{label:'Laylaps sounds',type:'checkbox',checked:SND.on(),click:()=>{LS.set('nmsc_lsound',!SND.on());if(SND.on())startSnd();else stopSnd();}},{label:'Alerts on',type:'checkbox',checked:!LS.get('nmsc_mute',false),click:()=>LS.set('nmsc_mute',!LS.get('nmsc_mute',false))},{type:'separator'},
      {label:'Full window',click:()=>setMode('full')},{label:'Hide',click:()=>desktop.window.hide()}]);}catch(e){}};
    // the picture is the drag handle: manual drag so a plain click still opens the menu
    const sw=$('#sw');let dg=null;

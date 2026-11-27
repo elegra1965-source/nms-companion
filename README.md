@@ -6,6 +6,7 @@ Free desktop companion for No Man's Sky. No account, no ads.
 - Portal Dialer (glyphs + hex) with Alt+Shift+P hotkey
 - Atlas desk: offline answers, or your own Claude key (optional)
 - Discovery catalogue for systems, bases, creatures and pets
+- Laylaps mode plays a quiet hover hum with an occasional beep, recorded from the game (Hello Games' sound). Switch it off any time: click Laylaps, untick Laylaps sounds.
 - Alerts: new expedition, 24 h and 1 h reminders, Wednesday update day
 - Laylaps, a floating sentinel that pops up alerts
 
