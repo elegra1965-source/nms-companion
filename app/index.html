@@ -770,9 +770,11 @@ renderRules();renderRecent();renderDial();renderExp();renderLog();
    sw.addEventListener('lostpointercapture',()=>{if(dg){const d=dg;dg=null;sw.classList.remove('drag');if(!d.moved)menu();}});
    window.addEventListener('blur',()=>{dg=null;sw.classList.remove('drag');});
    sw.addEventListener('pointermove',e=>{if(!dg)return;const dx=e.screenX-dg.sx,dy=e.screenY-dg.sy;
-    if(!dg.moved&&Math.hypot(dx,dy)<5)return;dg.moved=true;sw.classList.add('drag');
-    if(dg.b){const n=performance.now();if(n-dg.last<16)return;dg.last=n;const nx=Math.round(dg.b.x+dx),ny=Math.round(dg.b.y+dy);
-     cb={x:nx,y:ny,width:dg.b.width,height:dg.b.height};try{desktop.window.setBounds(cb).catch(()=>refresh().catch(()=>{}));}catch(x){}face(nx+dg.b.width/2);}});
+    if(!dg.moved&&Math.hypot(dx,dy)<5)return;
+    if(!dg.moved){dg.moved=true;dg.px=dg.sx;dg.py=dg.sy;sw.classList.add('drag');}
+    // move by the change since the last applied step, from the CURRENT window size (the speech bubble can grow or shrink the window mid-drag)
+    if(cb){const n=performance.now();if(n-dg.last<16)return;dg.last=n;const nx=Math.round(cb.x+(e.screenX-dg.px)),ny=Math.round(cb.y+(e.screenY-dg.py));dg.px=e.screenX;dg.py=e.screenY;
+     cb={x:nx,y:ny,width:cb.width,height:cb.height};try{desktop.window.setBounds(cb).catch(()=>refresh().catch(()=>{}));}catch(x){}face(nx+cb.width/2);}});
    const end=e=>{if(!dg)return;const d=dg;dg=null;sw.classList.remove('drag');try{sw.releasePointerCapture(e.pointerId);}catch(x){}if(!d.moved)menu();};
    sw.addEventListener('pointerup',end);sw.addEventListener('pointercancel',end);}
   else{
