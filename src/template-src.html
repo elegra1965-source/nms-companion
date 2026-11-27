@@ -133,7 +133,7 @@ textarea.inp{text-transform:none;font:500 15px Rajdhani,sans-serif;letter-spacin
 .collhead .sum{font:600 11px Orbitron,sans-serif;letter-spacing:.1em;color:var(--dim)}
 .collhead .chev{width:9px;height:9px;border-right:2px solid var(--cy);border-bottom:2px solid var(--cy);transform:rotate(45deg);transition:transform .15s;margin:0 4px 3px 0}
 .collhead[aria-expanded=true] .chev{transform:rotate(-135deg);margin-bottom:-3px}
-.dfbody{margin-top:8px}
+.dfbody{margin-top:8px}.foot{position:sticky;bottom:0;background:var(--bg);margin-top:auto}
 .dfbody[hidden]{display:none}
 .rule{padding:7px 0}
 @media (min-width:760px){
@@ -301,7 +301,7 @@ body.comp>*:not(#comp):not(script){display:none!important}
       <div class="btns"><button class="btn" id="bTest"><img data-i="bell" alt="Test">SEND TEST ALERT</button></div>
     </div>
     <div class="al2">
-    <div class="panel">
+    <div class="panel" data-fold data-sum="">
       <div class="kick al">RECENT ALERTS</div>
       <div class="log" id="log"><div class="sub">Nothing yet.</div></div>
     </div>
@@ -440,7 +440,7 @@ const RULES=[
  {id:'end1',t:'Live expedition ends in 1 hour',d:'One reminder'},
  {id:'wed',t:'Wednesday 14:00 UK update day',d:'Hello Games post expeditions and updates then'},
  {id:'research',t:'Community research tier changes',d:'From the Hub research feed'},
- {id:'weather',t:'Weather hazard alerts',d:'Not connected in this preview',off:true}
+ {id:'weather',t:'Weather hazard alerts',d:'Not available yet',off:true}
 ];
 let prefs=LS.get('nmsc_rules',{newExp:true,end24:true,end1:true,wed:true,research:false,weather:false});
 const logArr=[];
@@ -711,6 +711,14 @@ renderRules();renderRecent();renderDial();renderExp();renderLog();
  }
  load(false);
 })();
+
+/* fold panels */
+document.querySelectorAll('.panel[data-fold]').forEach((pn,i)=>{const k=pn.querySelector('.kick');if(!k||pn.dataset.done)return;pn.dataset.done=1;
+ const b=document.createElement('button');b.className='collhead';b.setAttribute('aria-expanded','false');
+ const sum=document.createElement('span');sum.className='sum';sum.textContent=pn.dataset.sum||'';if(pn.id)sum.id=pn.id+'Sum';
+ const ch=document.createElement('span');ch.className='chev';k.parentNode.insertBefore(b,k);b.appendChild(k);b.appendChild(sum);b.appendChild(ch);
+ const body=document.createElement('div');body.className='dfbody';body.hidden=true;while(b.nextSibling)body.appendChild(b.nextSibling);pn.appendChild(body);
+ b.onclick=()=>{const o=b.getAttribute('aria-expanded')==='true';b.setAttribute('aria-expanded',!o);body.hidden=o;};});
 </script>
 </body>
 </html>
