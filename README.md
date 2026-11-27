@@ -17,4 +17,4 @@ See the Releases page. The app is not code-signed, so Windows may show "unknown 
 Built by elegra1965. Game content belongs to Hello Games. Data: Voyager's Haven, NMS Almanac, nomanssky.com posts.
 
 ## Build
-`npm install` then `npm start`. A new release is built by pushing a tag like `v1.0.0` (GitHub Actions).
+`npm install` then `npm start`. A new release is built by every push to main (GitHub Actions).

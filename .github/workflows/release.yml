@@ -1,7 +1,7 @@
 name: Build installers
 on:
   push:
-    tags: ['v*']
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: write
@@ -27,8 +27,10 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: npx electron-builder --linux AppImage --publish never
       - uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
         with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: NMS Companion v1.0.${{ github.run_number }}
+          body: "Free desktop companion for No Man's Sky. Unsigned build: Windows may say unknown publisher (More info, Run anyway); macOS needs right-click, Open."
           files: |
             dist/*.exe
             dist/*.dmg
