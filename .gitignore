@@ -1,6 +1,5 @@
 node_modules/
 dist/
 smoke.js
-template-src.html
 _tmp.html
 build/icon-src.png

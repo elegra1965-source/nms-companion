@@ -51,6 +51,14 @@ ipcMain.handle('fs',async(_e,{op,p,data,enc,rec})=>{p=home(p);
   if(op==='read'){return fs.readFileSync(p,'utf8');}
   throw new Error('bad op');});
 ipcMain.handle('open-path',async(_e,p)=>{p=home(p);if(!fs.existsSync(p))throw new Error('missing');const r=await shell.openPath(p);if(r)throw new Error(r);return true;});
+const REL='https://github.com/elegra1965-source/nms-companion/releases/latest/download/';
+const dlName=()=>process.platform==='win32'?'NMS-Companion-Setup.exe':process.platform==='darwin'?('NMS-Companion-Mac-'+(process.arch==='arm64'?'arm64':'x64')+'.dmg'):'NMS-Companion-Linux.AppImage';
+ipcMain.handle('app-update',async()=>{const version=app.getVersion();try{const r=await fetch('https://api.github.com/repos/elegra1965-source/nms-companion/releases/latest',{headers:{'user-agent':'nms-companion'}});if(!r.ok)return {version,error:r.status};const j=await r.json();return {version,latest:String(j.tag_name||'').replace(/^v/,'')};}catch(e){return {version,error:1};}});
+ipcMain.handle('app-download',async()=>{shell.openExternal(REL+dlName());return true;});
+ipcMain.handle('app-uninstall',async()=>{
+  if(process.platform==='win32'){shell.openExternal('ms-settings:appsfeatures');return 'Windows Settings opened: find NMS Companion in the list and choose Uninstall. If you use the portable version, just delete the file. Your saved files stay in Documents/NMS Companion.';}
+  if(process.platform==='darwin')return 'Drag NMS Companion from Applications to the Bin. Your saved files stay in Documents/NMS Companion.';
+  return 'Delete the AppImage file. Your saved files stay in Documents/NMS Companion.';});
 // Atlas with the user's own Claude key (one request per call, no server of ours involved)
 ipcMain.handle('ai',async(_e,{key,body})=>{
   const models=['claude-haiku-4-5-20251001','claude-sonnet-4-6'];let last={status:0,text:''};
