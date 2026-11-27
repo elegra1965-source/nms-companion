@@ -35,8 +35,7 @@
       ]
     },
     "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
+      "oneClick": true,
       "perMachine": false,
       "artifactName": "NMS-Companion-Setup.${ext}"
     },

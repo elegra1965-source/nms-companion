@@ -61,7 +61,7 @@ ipcMain.handle('app-download',async(e)=>{
       autoUpdater.removeAllListeners();
       autoUpdater.on('download-progress',p=>send('Downloading '+Math.round(p.percent)+'%'));
       autoUpdater.on('update-downloaded',()=>{send('Installing, the app will restart...');setTimeout(()=>{app.quitting=true;autoUpdater.quitAndInstall(true,true);},800);});
-      autoUpdater.on('error',()=>{send('Update failed, opening the download instead.');shell.openExternal(REL+dlName());});
+      autoUpdater.on('error',er=>{try{fs.appendFileSync(path.join(app.getPath('documents'),'NMS Companion','update.log'),new Date().toISOString()+' '+String(er&&er.stack||er)+'\n');}catch(_){}send('Update failed, opening the download instead.');shell.openExternal(REL+dlName());});
       const r=await autoUpdater.checkForUpdates();if(!r||!r.updateInfo){shell.openExternal(REL+dlName());return true;}
       send('Downloading 0%');await autoUpdater.downloadUpdate();return true;
     }catch(err){send('Update failed, opening the download instead.');}
