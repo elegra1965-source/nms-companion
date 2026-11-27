@@ -22,6 +22,12 @@ Everything is saved on your own computer (Documents/NMS Companion). Use Export/I
 
 Laylaps, the floating sentinel: ![Laylaps floating on the desktop](screenshots/01-float-laylaps.jpg)
 
+Laylaps in action (filmed on a real desktop):
+
+| Bobbing on the desktop | Alert decoding from the alien font | Update available |
+|---|---|---|
+| ![Laylaps bobbing gently above the desktop](screenshots/laylaps-bobbing.gif) | ![Laylaps speech bubble decoding an expedition alert from the alien font to English](screenshots/laylaps-alert-decode.gif) | ![Laylaps speech bubble saying a new NMS Companion update is available](screenshots/laylaps-update-available.gif) |
+
 ## Download
 See the Releases page. The app is not code-signed, so Windows may show "unknown publisher" (More info, Run anyway) and macOS may need right-click, Open.
 
