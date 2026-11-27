@@ -28,8 +28,6 @@ Laylaps in action (filmed on a real desktop):
 |---|---|
 | ![Laylaps bobbing gently above the desktop](screenshots/laylaps-bobbing.gif) | ![Laylaps speech bubble decoding an expedition alert from the alien font to English](screenshots/laylaps-alert-decode.gif) |
 
-Laylaps also chirps and clicks like a little robot when it speaks. The GIFs are silent: [watch the alert clip with sound](screenshots/laylaps-alert-with-sound.mp4).
-
 ## Download
 See the Releases page. The app is not code-signed, so Windows may show "unknown publisher" (More info, Run anyway) and macOS may need right-click, Open.
 
