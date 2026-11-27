@@ -53,14 +53,19 @@ ipcMain.handle('fs',async(_e,{op,p,data,enc,rec})=>{p=home(p);
 ipcMain.handle('open-path',async(_e,p)=>{p=home(p);if(!fs.existsSync(p))throw new Error('missing');const r=await shell.openPath(p);if(r)throw new Error(r);return true;});
 const REL='https://github.com/elegra1965-source/nms-companion/releases/latest/download/';
 const dlName=()=>process.platform==='win32'?'NMS-Companion-Setup.exe':process.platform==='darwin'?('NMS-Companion-Mac-'+(process.arch==='arm64'?'arm64':'x64')+'.dmg'):'NMS-Companion-Linux.AppImage';
-ipcMain.handle('app-update',async()=>{const version=app.getVersion();try{const r=await fetch('https://api.github.com/repos/elegra1965-source/nms-companion/releases/latest',{headers:{'user-agent':'nms-companion'}});if(!r.ok)return {version,error:r.status};const j=await r.json();return {version,latest:String(j.tag_name||'').replace(/^v/,'')};}catch(e){return {version,error:1};}});
+const pendF=()=>path.join(app.getPath('userData'),'pending-update.json');
+const pendRead=()=>{try{const o=JSON.parse(fs.readFileSync(pendF(),'utf8'));return o;}catch(_){return null;}};
+ipcMain.handle('app-update',async()=>{const version=app.getVersion();let blocked=null;const pd=pendRead();
+  if(pd&&pd.to){const cmp=(a,b)=>{const x=String(a).split('.').map(Number),y=String(b).split('.').map(Number);for(let i=0;i<3;i++){if((x[i]||0)!==(y[i]||0))return(x[i]||0)>(y[i]||0)?1:-1;}return 0;};
+    if(cmp(version,pd.to)>=0){try{fs.unlinkSync(pendF());}catch(_){}}else if(Date.now()-pd.at<14*864e5)blocked=pd.to;}
+  try{const r=await fetch('https://api.github.com/repos/elegra1965-source/nms-companion/releases/latest',{headers:{'user-agent':'nms-companion'}});if(!r.ok)return {version,blocked,error:r.status};const j=await r.json();return {version,blocked,latest:String(j.tag_name||'').replace(/^v/,'')};}catch(e){return {version,blocked,error:1};}});
 ipcMain.handle('app-download',async(e)=>{
   const send=t=>{try{e.sender.send('app-upd',t);}catch(_){}};
   if(process.platform==='win32'&&app.isPackaged&&!process.env.PORTABLE_EXECUTABLE_DIR){
     try{const {autoUpdater}=require('electron-updater');autoUpdater.autoDownload=false;autoUpdater.autoInstallOnAppQuit=false;
       autoUpdater.removeAllListeners();
       autoUpdater.on('download-progress',p=>send('Downloading '+Math.round(p.percent)+'%'));
-      autoUpdater.on('update-downloaded',()=>{send('Opening the installer, click through it to finish...');setTimeout(()=>{app.quitting=true;autoUpdater.quitAndInstall(false,true);},800);});
+      autoUpdater.on('update-downloaded',inf=>{try{fs.writeFileSync(pendF(),JSON.stringify({to:inf&&inf.version,at:Date.now()}));}catch(_){}send('Opening the installer, click through it to finish...');setTimeout(()=>{app.quitting=true;autoUpdater.quitAndInstall(false,true);},800);});
       autoUpdater.on('error',er=>{try{fs.appendFileSync(path.join(app.getPath('documents'),'NMS Companion','update.log'),new Date().toISOString()+' '+String(er&&er.stack||er)+'\n');}catch(_){}send('Update failed, opening the download instead.');shell.openExternal(REL+dlName());});
       const r=await autoUpdater.checkForUpdates();if(!r||!r.updateInfo){shell.openExternal(REL+dlName());return true;}
       send('Downloading 0%');await autoUpdater.downloadUpdate();return true;

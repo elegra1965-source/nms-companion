@@ -440,10 +440,9 @@ const RULES=[
  {id:'end24',t:'Live expedition ends in 24 hours',d:'One reminder'},
  {id:'end1',t:'Live expedition ends in 1 hour',d:'One reminder'},
  {id:'wed',t:'Wednesday 14:00 UK update day',d:'Hello Games post expeditions and updates then'},
- {id:'research',t:'Community research tier changes',d:'From the Hub research feed'},
- {id:'weather',t:'Weather hazard alerts',d:'Not available yet',off:true}
+ {id:'research',t:'Community research tier changes',d:'From the Hub research feed'}
 ];
-let prefs=LS.get('nmsc_rules',{newExp:true,end24:true,end1:true,wed:true,research:false,weather:false});
+let prefs=LS.get('nmsc_rules',{newExp:true,end24:true,end1:true,wed:true,research:false});
 const logArr=[];
 function renderRules(){const w=$('#rules');w.innerHTML='';RULES.forEach(r=>{const d=document.createElement('div');d.className='rule';
  const t=document.createElement('div');t.className='t';t.textContent=r.t;const s=document.createElement('small');s.textContent=r.d;t.appendChild(s);

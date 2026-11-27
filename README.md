@@ -40,4 +40,4 @@ Free code signing provided by [SignPath.io](https://signpath.io), certificate by
 ## Build
 `npm install` then `npm start`. A new release is built by every push to main (GitHub Actions).
 
-Updates: on Windows the app updates itself from the Alerts tab (THIS APP, Download update).
+Updates: on Windows the app updates itself from the Alerts tab (THIS APP, Download update). The app is not code-signed yet, so Windows Smart App Control (a Windows 11 setting) blocks the installer and the update silently does nothing. If that happens the app says so on the next start. Smart App Control cannot allow single apps; it has to be turned off in Windows Security, App and browser control, or the app can be installed after SignPath signing is approved. The normal SmartScreen warning is fine: choose More info, Run anyway.
