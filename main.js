@@ -39,7 +39,7 @@ ipcMain.handle('win-hide',async()=>{win.hide();return true;});
 ipcMain.handle('win-show',async()=>{win.show();win.focus();return true;});
 ipcMain.handle('menu-popup',async(_e,items)=>{mkMenu(items).popup({window:win});return true;});
 ipcMain.handle('tray-set',async(_e,o)=>{
-  const img=nativeImage.createFromDataURL(o.icon).resize({width:16,height:16});
+  const img=nativeImage.createFromPath(path.join(__dirname,'build','tray.png'));
   if(!tray){tray=new Tray(img);tray.on('click',()=>{if(win){win.show();win.focus();}});}else tray.setImage(img);
   tray.setToolTip((o.toolTip||'NMS Companion')+(o.title?'  ·  '+o.title:''));tray.setContextMenu(mkMenu(o.menu));return true;});
 ipcMain.handle('gs-register',async(_e,acc)=>{try{globalShortcut.unregister(acc);return globalShortcut.register(acc,()=>send('gs',acc));}catch(e){return false;}});

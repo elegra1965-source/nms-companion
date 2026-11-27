@@ -6,16 +6,67 @@
   "author": "elegra1965",
   "license": "MIT",
   "main": "main.js",
-  "scripts": {"start": "electron .", "dist:win": "electron-builder --win nsis portable", "dist:mac": "electron-builder --mac dmg", "dist:linux": "electron-builder --linux AppImage"},
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win nsis portable",
+    "dist:mac": "electron-builder --mac dmg",
+    "dist:linux": "electron-builder --linux AppImage"
+  },
   "build": {
     "appId": "app.nomansskyhub.companion",
     "productName": "NMS Companion",
-    "files": ["main.js", "preload.js", "app/**/*", "package.json"],
-    "directories": {"buildResources": "build", "output": "dist"},
-    "win": {"icon": "build/icon.png", "signAndEditExecutable": false, "target": ["nsis", "portable"]},
-    "nsis": {"oneClick": false, "allowToChangeInstallationDirectory": true, "perMachine": false},
-    "mac": {"icon": "build/icon.png", "category": "public.app-category.games", "target": ["dmg"], "identity": null},
-    "linux": {"icon": "build/icon.png", "target": ["AppImage"], "category": "Game"}
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/**/*",
+      "build/icon.png",
+      "package.json",
+      "build/tray.png"
+    ],
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "win": {
+      "icon": "build/icon.png",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "artifactName": "NMS-Companion-Setup.${ext}"
+    },
+    "mac": {
+      "icon": "build/icon.png",
+      "category": "public.app-category.games",
+      "target": [
+        "dmg"
+      ],
+      "identity": null
+    },
+    "linux": {
+      "icon": "build/icon.png",
+      "target": [
+        "AppImage"
+      ],
+      "category": "Game"
+    },
+    "portable": {
+      "artifactName": "NMS-Companion-Portable.${ext}"
+    },
+    "dmg": {
+      "artifactName": "NMS-Companion-Mac-${arch}.${ext}"
+    },
+    "appImage": {
+      "artifactName": "NMS-Companion-Linux.${ext}"
+    }
   },
-  "devDependencies": {"electron": "^33.0.0", "electron-builder": "^25.0.0"}
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  }
 }
