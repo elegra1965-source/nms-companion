@@ -11,6 +11,17 @@ Free desktop companion for No Man's Sky. No account, no ads.
 
 Everything is saved on your own computer (Documents/NMS Companion). Use Export/Import backup in the Alerts tab to move to a new computer.
 
+## Screenshots
+| Expedition | Portal Dialer | Atlas desk |
+|---|---|---|
+| ![Expedition tab with live countdown](screenshots/03-expedition.jpg) | ![Portal Dialer with glyph ring](screenshots/04-dialer.jpg) | ![Atlas desk with offline answers](screenshots/05-atlas.jpg) |
+
+| Catalogue | Alerts | Float window |
+|---|---|---|
+| ![Discovery catalogue](screenshots/06-catalogue.jpg) | ![Alert settings](screenshots/07-alerts.jpg) | ![Small always-on-top float window](screenshots/02-float-expedition.jpg) |
+
+Laylaps, the floating sentinel: ![Laylaps floating on the desktop](screenshots/01-float-laylaps.jpg)
+
 ## Download
 See the Releases page. The app is not code-signed, so Windows may show "unknown publisher" (More info, Run anyway) and macOS may need right-click, Open.
 
