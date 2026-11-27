@@ -24,9 +24,11 @@ Laylaps, the floating sentinel: ![Laylaps floating on the desktop](screenshots/0
 
 Laylaps in action (filmed on a real desktop):
 
-| Bobbing on the desktop | Alert decoding from the alien font | Update available |
-|---|---|---|
-| ![Laylaps bobbing gently above the desktop](screenshots/laylaps-bobbing.gif) | ![Laylaps speech bubble decoding an expedition alert from the alien font to English](screenshots/laylaps-alert-decode.gif) | ![Laylaps speech bubble saying a new NMS Companion update is available](screenshots/laylaps-update-available.gif) |
+| Bobbing on the desktop | Alert decoding from the alien font |
+|---|---|
+| ![Laylaps bobbing gently above the desktop](screenshots/laylaps-bobbing.gif) | ![Laylaps speech bubble decoding an expedition alert from the alien font to English](screenshots/laylaps-alert-decode.gif) |
+
+Laylaps also chirps and clicks like a little robot when it speaks. The GIFs are silent: [watch the alert clip with sound](screenshots/laylaps-alert-with-sound.mp4).
 
 ## Download
 See the Releases page. The app is not code-signed, so Windows may show "unknown publisher" (More info, Run anyway) and macOS may need right-click, Open.
