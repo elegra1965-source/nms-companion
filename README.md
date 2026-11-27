@@ -14,7 +14,7 @@ Everything is saved on your own computer (Documents/NMS Companion). Use Export/I
 ## Download
 See the Releases page. The app is not code-signed, so Windows may show "unknown publisher" (More info, Run anyway) and macOS may need right-click, Open.
 
-Built by elegra1965. Game content belongs to Hello Games. Data: Voyager's Haven, NMS Almanac, nomanssky.com posts.
+Built by elegra1965. No Man's Sky, its names, pictures and sounds belong to Hello Games. This is an unofficial fan project, not affiliated with or endorsed by Hello Games. The Atlas and Laylaps artwork is used as fan art with credit to Hello Games. Data: Voyager's Haven, NMS Almanac, nomanssky.com posts.
 
 ## Privacy
 The app sends nothing about you anywhere. It only contacts: map.nomansskyhub.app (expedition schedule, read only), nomanssky.com (official news), api.github.com (checks for a newer version and downloads updates), and, only if you add your own key, api.anthropic.com (your Atlas questions). No accounts, no analytics, no tracking. Your catalogue, settings and key stay on your computer.
