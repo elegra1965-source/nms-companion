@@ -692,6 +692,7 @@ renderRules();renderRecent();renderDial();renderExp();renderLog();
     const z=CS[csz],nw=on?Math.max(z.w,BW):z.w,nh=on?z.h+BH:z.h;
     const nb={x:Math.round(b.x+(b.width-nw)/2),y:b.y-(nh-b.height),width:nw,height:nh};try{await desktop.window.setBounds(nb);grown=on;if(window.compSet)window.compSet(nb);}catch(e){}};
    const menu=async()=>{try{await desktop.Menu.popup([
+     ...(window.__nmscUpd?[{label:'Update now (v'+window.__nmscUpd.latest+')',click:()=>{try{window.nmscBridge.invoke('app-download');}catch(e){}sentBubble('Updating','Downloading the update. The installer opens when it is ready.');}},{type:'separator'}]:[]),
      {label:'Expedition',click:()=>openView('exp')},{label:'Dialer',click:()=>openView('dial')},{label:'Atlas',click:()=>openView('atlas')},{label:'Catalogue',click:()=>openView('note')},{type:'separator'},
      {label:'Size: Small',type:'radio',checked:csz==='s',click:()=>applySize('s')},{label:'Size: Medium',type:'radio',checked:csz==='m',click:()=>applySize('m')},{label:'Size: Large',type:'radio',checked:csz==='l',click:()=>applySize('l')},{type:'separator'},
      {label:'Show a test alert',click:()=>sentBubble('Expedition alert','Aquarius ends in under 24 hours.')},{label:'Laylaps sounds',type:'checkbox',checked:SND.on(),click:()=>{LS.set('nmsc_lsound',!SND.on());if(SND.on())startSnd();else stopSnd();}},{label:'Alerts on',type:'checkbox',checked:!LS.get('nmsc_mute',false),click:()=>LS.set('nmsc_mute',!LS.get('nmsc_mute',false))},{type:'separator'},
