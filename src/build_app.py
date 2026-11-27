@@ -28,7 +28,8 @@ rep("$('#bTest').onclick=","""if(window.NMSC_STANDALONE){$('#keyBox').hidden=fal
  const chk=async quiet=>{try{const r=await window.nmscBridge.invoke('app-update');$('#appVer').textContent=r.version;if(r.error){if(!quiet)$('#appMsg').textContent='Could not reach GitHub. Try again later.';return;}
   if(compare(r.latest,r.version)>0){upd=r;$('#appMsg').textContent='Version '+r.latest+' is available.';$('#appChk').textContent='DOWNLOAD UPDATE';if(quiet)notify('Update available','NMS Companion '+r.latest+' is ready. Open the Alerts tab to download it.','upd-'+r.latest);}
   else{$('#appMsg').textContent='You have the latest version.';$('#appChk').textContent='CHECK FOR UPDATES';}}catch(e){if(!quiet)$('#appMsg').textContent='Could not check for updates.';}};
- $('#appChk').onclick=()=>{if(upd){window.nmscBridge.invoke('app-download');}else chk(false);};
+ window.nmscBridge.on('app-upd',t=>{$('#appMsg').textContent=t;});
+ $('#appChk').onclick=()=>{if(upd){$('#appMsg').textContent='Starting update...';window.nmscBridge.invoke('app-download');}else chk(false);};
  $('#appUn').onclick=async()=>{const m=await window.nmscBridge.invoke('app-uninstall');$('#appMsg').textContent=m;};
  setTimeout(()=>chk(true),8000);
  $('#keyIn').value=localStorage.getItem('nmsc_key')?'saved':'';

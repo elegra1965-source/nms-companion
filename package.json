@@ -63,10 +63,20 @@
     },
     "appImage": {
       "artifactName": "NMS-Companion-Linux.${ext}"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "elegra1965-source",
+        "repo": "nms-companion"
+      }
+    ]
   },
   "devDependencies": {
     "electron": "^33.0.0",
     "electron-builder": "^25.0.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.11"
   }
 }

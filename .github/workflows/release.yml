@@ -36,3 +36,5 @@ jobs:
             dist/*.exe
             dist/*.dmg
             dist/*.AppImage
+            dist/latest*.yml
+            dist/*.blockmap
