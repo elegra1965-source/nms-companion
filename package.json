@@ -1,0 +1,21 @@
+{
+  "name": "nms-companion",
+  "productName": "NMS Companion",
+  "version": "1.0.0",
+  "description": "Free No Man's Sky companion: expedition countdown, portal dialer, Atlas desk, discovery catalogue and Laylaps alerts.",
+  "author": "elegra1965",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {"start": "electron .", "dist:win": "electron-builder --win nsis portable", "dist:mac": "electron-builder --mac dmg", "dist:linux": "electron-builder --linux AppImage"},
+  "build": {
+    "appId": "app.nomansskyhub.companion",
+    "productName": "NMS Companion",
+    "files": ["main.js", "preload.js", "app/**/*", "package.json"],
+    "directories": {"buildResources": "build", "output": "dist"},
+    "win": {"icon": "build/icon.png", "signAndEditExecutable": false, "target": ["nsis", "portable"]},
+    "nsis": {"oneClick": false, "allowToChangeInstallationDirectory": true, "perMachine": false},
+    "mac": {"icon": "build/icon.png", "category": "public.app-category.games", "target": ["dmg"], "identity": null},
+    "linux": {"icon": "build/icon.png", "target": ["AppImage"], "category": "Game"}
+  },
+  "devDependencies": {"electron": "^33.0.0", "electron-builder": "^25.0.0"}
+}
