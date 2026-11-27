@@ -18,3 +18,5 @@ Built by elegra1965. Game content belongs to Hello Games. Data: Voyager's Haven,
 
 ## Build
 `npm install` then `npm start`. A new release is built by every push to main (GitHub Actions).
+
+Updates: on Windows the app updates itself from the Alerts tab (THIS APP, Download update).
