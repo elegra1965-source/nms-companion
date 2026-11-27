@@ -26,7 +26,7 @@ rep("$('#bTest').onclick=","""if(window.NMSC_STANDALONE){$('#keyBox').hidden=fal
  const compare=(a,b)=>{const x=a.split('.').map(Number),y=b.split('.').map(Number);for(let i=0;i<3;i++){if((x[i]||0)!==(y[i]||0))return(x[i]||0)>(y[i]||0)?1:-1;}return 0;};
  let upd=null;
  const chk=async quiet=>{try{const r=await window.nmscBridge.invoke('app-update');$('#appVer').textContent=r.version;$('#appPanelSum').textContent=compare(r.latest||r.version,r.version)>0?'UPDATE AVAILABLE':'v'+r.version;if(r.error){if(!quiet)$('#appMsg').textContent='Could not reach GitHub. Try again later.';return;}
-  if(compare(r.latest,r.version)>0){upd=r;$('#appMsg').textContent='Version '+r.latest+' is available.';$('#appChk').textContent='DOWNLOAD UPDATE';if(quiet)notify('Update available','NMS Companion '+r.latest+' is ready. Open the Alerts tab to download it.','upd-'+r.latest);}
+  if(compare(r.latest,r.version)>0){upd=r;$('#appMsg').textContent='Version '+r.latest+' is available.';$('#appChk').textContent='DOWNLOAD UPDATE';if(quiet)notify('Update available','NMS Companion '+r.latest+' is ready. Click me, then open Alerts, THIS APP to update.','upd-'+r.latest+(document.body.classList.contains('comp')?'-laylaps':''));}
   else{$('#appMsg').textContent='You have the latest version.';$('#appChk').textContent='CHECK FOR UPDATES';}}catch(e){if(!quiet)$('#appMsg').textContent='Could not check for updates.';}};
  window.nmscBridge.on('app-upd',t=>{$('#appMsg').textContent=t;});
  $('#appChk').onclick=()=>{if(upd){$('#appMsg').textContent='Starting update...';window.nmscBridge.invoke('app-download');}else chk(false);};
