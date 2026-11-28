@@ -23,6 +23,12 @@ Everything is saved on your own computer (Documents/NMS Companion). Use Export/I
 
 Laylaps, the floating sentinel: ![Laylaps floating on the desktop](screenshots/01-float-laylaps.jpg)
 
+Laylaps asleep (sleep murmurs), waking with a dream line, and his menu (put him to sleep, setup, sounds):
+
+| | | |
+|---|---|---|
+| ![Laylaps asleep, murmuring in his sleep](screenshots/laylaps-sleep-murmur.jpg) | ![Laylaps waking up with a dream line](screenshots/laylaps-wake-dream.jpg) | ![Laylaps menu with Put Laylaps to sleep and Laylaps setup](screenshots/laylaps-menu.jpg) |
+
 Laylaps in action (filmed on a real desktop):
 
 | Bobbing on the desktop | Alert decoding from the alien font |
@@ -38,7 +44,7 @@ Built by elegra1965. No Man's Sky, its names, pictures and sounds belong to Hell
 The app sends nothing about you anywhere. It only contacts: map.nomansskyhub.app (expedition schedule, read only), nomanssky.com (official news), api.github.com (checks for a newer version and downloads updates), and, only if you add your own key, api.anthropic.com (your Atlas questions). If you turn on Laylaps weather alerts and type a city, that place (city, postcode or country) is sent to nominatim.openstreetmap.org (to find it) and open-meteo.com (the forecast) and nowhere else. Your name, city and reminders are stored only on your computer. No accounts, no analytics, no tracking. Your catalogue, settings and key stay on your computer.
 
 ## Laylaps
-The floating sentinel chats while you wait (expedition news, update day, NMS lore, tips), uses the name you give him, falls asleep when you are away (and wakes with a dream), raises weather alerts for your city and keeps reminders. Set up under Alerts, Laylaps, or click him and choose Laylaps setup. A what's-new card shows once after each update.
+The floating sentinel chats while you wait (expedition news, update day, NMS lore, tips), uses the name you give him, falls asleep when you are away or when you put him to sleep from his menu (and wakes with a dream), speaks every 30 seconds to 15 minutes or at random, keeps reminders on any weekday, opens the Dialer or Atlas with Alt+Shift+P and Alt+Shift+A even from Laylaps mode, shows the update message until you click it, raises weather alerts for your city and keeps reminders. Set up under Alerts, Laylaps, or click him and choose Laylaps setup. A what's-new card shows once after each update.
 
 ## Code signing policy
 Free code signing provided by [SignPath.io](https://signpath.io), certificate by [SignPath Foundation](https://signpath.org) (application pending; releases are unsigned until approved).
