@@ -36,6 +36,7 @@ ipcMain.handle('win-set',async(_e,o)=>{const b=win.getBounds();const n={...opts,
 ipcMain.handle('win-place',async(_e,o)=>{const b=win.getBounds();const w=o.width||b.width,h=o.height||b.height;win.setMinimumSize(Math.min(w,100),Math.min(h,100));win.setBounds({x:b.x,y:b.y,width:w,height:h});return true;});
 ipcMain.handle('win-get',async()=>win.getBounds());
 ipcMain.handle('win-setb',async(_e,b)=>{win.setBounds(b);return true;});
+ipcMain.handle('sys-idle',async()=>require('electron').powerMonitor.getSystemIdleTime());
 ipcMain.handle('win-hide',async()=>{win.hide();return true;});
 ipcMain.handle('win-show',async()=>{win.show();win.focus();return true;});
 ipcMain.handle('menu-popup',async(_e,items)=>{mkMenu(items).popup({window:win});return true;});

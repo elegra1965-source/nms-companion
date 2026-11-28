@@ -216,6 +216,8 @@ body.comp>*:not(#comp):not(script){display:none!important}
 @keyframes ping{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
 @media (prefers-reduced-motion:reduce){#sent,#sent.ping{animation:none}}
 .emp{position:relative;margin:12px 0;aspect-ratio:16/9;min-height:150px;border:1px solid var(--line);background:repeating-linear-gradient(0deg,rgba(53,208,224,.05) 0 2px,transparent 2px 5px),#070d15;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:12px}.emp i{position:absolute;width:12px;height:12px;border:2px solid var(--cy)}.emp i:nth-child(1){left:6px;top:6px;border-right:0;border-bottom:0}.emp i:nth-child(2){right:6px;top:6px;border-left:0;border-bottom:0}.emp i:nth-child(3){left:6px;bottom:6px;border-right:0;border-top:0}.emp i:nth-child(4){right:6px;bottom:6px;border-left:0;border-top:0}.emp .ei{width:44px;height:44px;background:center/contain no-repeat;opacity:.8}.emp b{font:700 12px Orbitron,sans-serif;letter-spacing:.16em;color:var(--am)}.emp span{font:500 14px Rajdhani,sans-serif;color:var(--mu,#8aa);max-width:260px}
+#layWiz{position:fixed;inset:0;z-index:50;background:rgba(3,7,12,.88);display:flex;align-items:center;justify-content:center;padding:14px}#layWiz .panel{max-width:420px;width:100%}
+body.lsleep #sent{opacity:.55;filter:saturate(.6)}.sw[aria-checked=true]{}
 </style>
 </head>
 <body>
@@ -342,6 +344,20 @@ body.comp>*:not(#comp):not(script){display:none!important}
       <div class="btns"><button class="btn" id="bTest"><img data-i="bell" alt="Test">SEND TEST ALERT</button></div>
     </div>
     <div class="al2">
+    <div class="panel" id="layPanel" data-fold data-sum="">
+      <div class="kick al">LAYLAPS</div>
+      <div class="rule"><div class="t">Speak while I wait<small>Lines about expeditions, lore and tips</small></div><div class="sw" id="layOn" aria-label="Laylaps speaks"></div></div>
+      <div class="fld"><label for="layName">WHAT SHOULD LAYLAPS CALL YOU?</label><input class="inp" id="layName" maxlength="20" placeholder="Leave blank for Traveller" style="text-transform:none"></div>
+      <div class="fld"><label>HOW OFTEN</label><div class="btns" id="layFreq"></div></div>
+      <div class="rule"><div class="t">Live news</div><div class="sw" id="layK-live" aria-label="Live news lines"></div></div>
+      <div class="rule"><div class="t">Catalogue nudges</div><div class="sw" id="layK-note" aria-label="Catalogue lines"></div></div>
+      <div class="rule"><div class="t">NMS lore and chatter</div><div class="sw" id="layK-lore" aria-label="Lore lines"></div></div>
+      <div class="rule"><div class="t">Tips</div><div class="sw" id="layK-tip" aria-label="Tip lines"></div></div>
+      <div class="fld"><label for="laySleep">FALL ASLEEP WHEN I AM AWAY</label><select class="inp" id="laySleep"><option value="15">After 15 min</option><option value="30">After 30 min</option><option value="60">After 1 hour</option><option value="0">Never</option></select></div>
+      <div class="fld"><label for="layCity">WEATHER PLACE</label><div class="btns" style="margin-top:0"><input class="inp" id="layCity" placeholder="City" style="text-transform:none;flex:1"><button class="btn" id="layCitySet">SET</button></div><div class="src" id="layCityMsg">Used only for weather alerts. Stays on this computer.</div></div>
+      <div class="fld"><label>REMINDERS</label><div id="layRem"></div><input class="inp" id="layRemText" maxlength="120" placeholder="Remind me to..." style="text-transform:none;margin-top:6px"><div class="btns"><input type="time" class="inp" id="layRemTime" value="20:00" style="width:auto"><select class="inp" id="layRemRep" style="width:auto"><option value="once">Once</option><option value="daily">Every day</option><option value="wed">Every Wednesday</option></select><button class="btn" id="layRemAdd">ADD</button></div></div>
+      <div class="btns"><button class="btn" id="laySay">SAY SOMETHING</button><button class="btn am" id="laySetup">SETUP AGAIN</button></div>
+    </div>
     <div class="panel" data-fold data-sum="">
       <div class="kick al">RECENT ALERTS</div>
       <div class="log" id="log"><div class="sub">Nothing yet.</div></div>
@@ -482,9 +498,14 @@ const RULES=[
  {id:'end24',t:'Live expedition ends in 24 hours',d:'One reminder'},
  {id:'end1',t:'Live expedition ends in 1 hour',d:'One reminder'},
  {id:'wed',t:'Wednesday 14:00 UK update day',d:'Hello Games post expeditions and updates then'},
- {id:'research',t:'Community research tier changes',d:'From the Hub research feed'}
+ {id:'research',t:'Community research tier changes',d:'From the Hub research feed'},
+ {id:'rain',t:'Rain or snow starting soon',d:'Needs a weather place under Laylaps'},
+ {id:'severe',t:'Extreme weather',d:'Storms, gales, heat, hard frost'},
+ {id:'temp',t:'Big temperature change',d:'5 degrees or more within 3 hours'},
+ {id:'daily',t:'Morning briefing',d:'Once a day after 07:00'},
+ {id:'tomorrow',t:'Tomorrow evening forecast',d:'Once a day after 18:00'}
 ];
-let prefs=LS.get('nmsc_rules',{newExp:true,end24:true,end1:true,wed:true,research:false});
+let prefs=Object.assign({rain:false,severe:false,temp:false,daily:false,tomorrow:false},LS.get('nmsc_rules',{newExp:true,end24:true,end1:true,wed:true,research:false}));
 const logArr=[];
 function renderRules(){const w=$('#rules');w.innerHTML='';RULES.forEach(r=>{const d=document.createElement('div');d.className='rule';
  const t=document.createElement('div');t.className='t';t.textContent=r.t;const s=document.createElement('small');s.textContent=r.d;t.appendChild(s);
@@ -497,7 +518,7 @@ function gibLike(s){const c='abcdefghklmnpqrstuvwxyzCDKXH&&**^^!!#%@~$?+=<>/';re
 function gib(n){const c='abcdefghklmnpqrstuvwxyzCDKXH&&**^^!!#%@~$?+=<>/';let s='';for(let i=0;i<n;i++)s+=c[Math.random()*c.length|0];return s;}
 let typT=0;
 function sentBubble(title,body){const bd=window.lsBeep?window.lsBeep():0;const b=$('#bub');clearInterval(typT);b.innerHTML='';const k=document.createElement('b');k.textContent='';k.setAttribute('aria-label','Laylaps');const tx=document.createElement('div');tx.className='al2';b.append(k,tx);
- const msg=title.toUpperCase()+'. '+body,g=gibLike(msg);
+ const msg=title?title.toUpperCase()+'. '+body:body,g=gibLike(msg);
  const hide=()=>{clearInterval(typT);clearTimeout(bubT);b.hidden=true;window.compGrow&&window.compGrow(false);};window.compGrow&&window.compGrow(true);b.hidden=false;
  const sn=$('#sent');sn.classList.remove('ping');void sn.offsetWidth;sn.classList.add('ping');clearTimeout(bubT);b.onclick=hide;
  let n=0,r=-8,ph=0;const stp=(bd>1&&bd<8)?Math.max(28,Math.min(90,Math.round(bd*850/(g.length+msg.length+8)))):56;
@@ -524,7 +545,7 @@ function checks(){
 if(window.NMSC_STANDALONE){$('#keyBox').hidden=false;$('#bkPanel').hidden=false;$('#appPanel').hidden=false;
  const compare=(a,b)=>{const x=a.split('.').map(Number),y=b.split('.').map(Number);for(let i=0;i<3;i++){if((x[i]||0)!==(y[i]||0))return(x[i]||0)>(y[i]||0)?1:-1;}return 0;};
  let upd=null;
- const chk=async quiet=>{try{const r=await window.nmscBridge.invoke('app-update');$('#appVer').textContent=r.version;$('#appPanelSum').textContent=compare(r.latest||r.version,r.version)>0?'UPDATE AVAILABLE':'v'+r.version;if(r.error){if(!quiet)$('#appMsg').textContent='Could not reach GitHub. Try again later.';return;}
+ const chk=async quiet=>{try{const r=await window.nmscBridge.invoke('app-update');$('#appVer').textContent=r.version;try{LAY.whatsNew(r.version);}catch(e){}$('#appPanelSum').textContent=compare(r.latest||r.version,r.version)>0?'UPDATE AVAILABLE':'v'+r.version;if(r.error){if(!quiet)$('#appMsg').textContent='Could not reach GitHub. Try again later.';return;}
   if(compare(r.latest,r.version)>0){upd=r;window.__nmscUpd=r;$('#appMsg').textContent=r.blocked?'The update to '+r.blocked+' did not finish. Windows may have blocked the installer (Smart App Control does this to apps that are not signed yet). Press DOWNLOAD UPDATE, then in the download choose More info, Run anyway. If Windows gives no such option, the app has to be installed with Smart App Control turned off. See the README.':'Version '+r.latest+' is available.';$('#appChk').textContent='DOWNLOAD UPDATE';if(quiet)notify('Update available','NMS Companion '+r.latest+(document.body.classList.contains('comp')?' is ready. Click me, then choose Update now.':' is ready. Open Alerts, THIS APP to update.'),'upd-'+r.latest+(document.body.classList.contains('comp')?'-laylaps':''));}
   else{$('#appMsg').textContent='You have the latest version.';$('#appChk').textContent='CHECK FOR UPDATES';}}catch(e){if(!quiet)$('#appMsg').textContent='Could not check for updates.';}};
  window.nmscBridge.on('app-upd',t=>{$('#appMsg').textContent=t;});
@@ -537,6 +558,114 @@ if(window.NMSC_STANDALONE){$('#keyBox').hidden=false;$('#bkPanel').hidden=false;
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:'application/json'}));a.download='nms-companion-backup.json';document.body.appendChild(a);a.click();a.remove();};
  $('#bkIn').onclick=()=>$('#bkFile').click();
  $('#bkFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const o=JSON.parse(await f.text());if(o.app!=='nms-companion'||!o.data)throw 0;for(const k in o.data)if(k.startsWith('nmsc_')&&k!=='nmsc_key')localStorage.setItem(k,o.data[k]);location.reload();}catch(x){alert('That is not a NMS Companion backup file.');}};}
+/* LAYLAPS: idle lines, sleep and wake, name, weather alerts, reminders, setup */
+const LAY=(()=>{
+const DEF={on:true,freq:5,kinds:{live:1,note:1,lore:1,tip:1},sleep:30,name:'',done:false,asked:0,place:null,rem:[]};
+let S=Object.assign({},DEF,LS.get('nmsc_lay',{}));S.kinds=Object.assign({},DEF.kinds,S.kinds||{});if(!Array.isArray(S.rem))S.rem=[];
+const save=()=>LS.set('nmsc_lay',S);
+const nm=()=>(S.name||'').trim()||'Traveller';
+const fill=t=>t.replace(/\{n\}/g,nm());
+const comp=()=>document.body.classList.contains('comp');
+const rnd=a=>a[Math.random()*a.length|0];
+const POOL={
+lore:["The Gek were once conquerors. Now they trade.","The Korvax seek knowledge above all else.","The Vy'keen honour strength and the hunt.","Euclid is the first galaxy every Traveller sees. There are 255.","More than eighteen quintillion planets. Most have never been seen.","The Space Anomaly follows the Traveller through the stars.","Sentinels guard the worlds. Not every visitor is welcome.","Every Traveller begins with a damaged ship and a broken Exosuit.","I wonder if the Atlas ever sleeps.","All is quiet, {n}. I am keeping watch.","Scanning... nothing. Good.","I do hope no Sentinels are nearby.","Somewhere, a Traveller is naming a planet badly.","Somewhere, a Gek is overcharging someone.","Systems nominal, {n}.","What lies past the next star, {n}? I never tire of asking.","I have counted the stars twice. The number kept changing.","Not a single Sentinel in sight. Suspicious.","Remember to refill your life support, {n}.","A good Traveller always keeps a spare Warp Cell.","Do not forget to check your hazard protection, {n}.","I find the stars calming. Do not tell the Atlas."],
+tip:["Save your portal addresses in the Catalogue, {n}. Glyphs are easy to lose.","Scan new creatures and plants for Units and discoveries.","Upload your discoveries so other Travellers can find them.","Check your Exosuit hazard bars before leaving the ship.","Take cover from storms. Exosuit protection drops fast outdoors.","Click me for another line, {n}. Or for settings.","The Portal Dialer takes twelve glyphs. Mind the order.","The Galactic Map can show where a portal address leads.","Expeditions reward patience. Read the milestones, not just the countdown.","Technology modules can gain bonuses from their neighbours. Mind your layout.","The Theme Pack has NMS wallpapers and icons for your phone.","Photo mode makes fine wallpapers. Try a different angle, {n}.","The Weather app shows how today's weather would treat your Exosuit."]};
+const WK=["Oh. {n}. I was only resting my sensors.","Mm. I was dreaming of a perfect Pulse Engine jump, {n}.","{n}! I dreamt a Sentinel asked me for directions.","I was dreaming of a planet with no hazards. Dull. Wonderful.","Sorry, {n}. I was counting Nanites. I lost count.","I dreamt the Atlas asked whether you had saved your game.","A dream of a thousand portal glyphs. I only remember twelve.","I was dreaming of a fully stocked freighter, {n}.","I dreamt a Gek offered me a fair price. Ridiculous.","Rest complete. Systems nominal, {n}.","Was that a Sandworm? No. Only you. Welcome back.","I dreamt a Korvax trusted me with a secret. I have forgotten it.","I was dreaming of a Starship with infinite slots. Then I woke up.","I dreamt every planet was Paradise. Suspicious.","I dreamt of a Vy'keen hunter. He wanted my snacks.","I dreamt I was a Gravitino Ball. Very relaxing.","I dreamt I picked up a Gravitino Ball. The Sentinels were very rude about it.","I dreamt of a Pirate who surrendered. I have never been so proud.","I was dreaming of the perfect base. Then you built a ladder on the roof.","I dreamt I could dial portals in my sleep. It went well, apart from the glyphs.","I dreamt of a clean, empty inventory. It was a nightmare.","I dreamt the Atlas stopped to chat. We talked about portals. It was awkward.","I was dreaming I won an expedition. You were there. We were both pleased.","Rest complete. All systems nominal. Mostly.","Hm? Is it a new expedition? No. Pity. Good morning, {n}.","A dream of a thousand Sentinel drones. Do not ask.","I dreamt of Fiendish Storms. Best not to mention them, {n}."];
+const LW=["You have been away a while, {n}. I counted every star.","Hours have passed. I tidied my thoughts. They are still messy.","Welcome back. I kept the expedition countdown warm for you."];
+const TH=["...the Gek... trade...","...Atlas... calling...","...one more... jump...","...portal... glyphs...","...Traveller...","...Gravitino... put it down...","...one more... Nanite...","...Sentinels... not me...","...Pulse fuel... low...","...a ladder... on the roof...","...glyph... eleven...","...storm... coming...","...slots... more slots...","...a fair price... Gek...","...warp... jump..."];
+const recent=[];
+function liveLines(){const o=[],l=data&&data.live;
+ if(l){const left=l.end-nowMs();if(left>0){const h=Math.round(left/36e5),d=Math.floor(left/864e5);o.push((l.title||l.name)+(h<48?' ends in '+h+(h===1?' hour.':' hours.'):' ends in '+d+' days.'));}}
+ if(data&&data.next)o.push('Next expedition: '+data.next.name+(data.next.estimated?' (estimated).':'.'));
+ try{const u=ukParts(),days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],i=days.indexOf(u.wd);if(i>=0){if(u.wd==='Wed'&&u.h<14)o.push('Update day is today at 14:00 UK, {n}.');else{const g=(3-i+7)%7||7;o.push('Update day is Wednesday at 14:00 UK. '+g+(g===1?' day':' days')+' to go.');}}}catch(e){}
+ if(data&&data.research)o.push('Community mission '+data.research.mission+' is at tier '+data.research.tier+'.');
+ return o;}
+function noteLines(){const n=(typeof notes!=='undefined'&&notes)||[];if(!n.length)return['Your catalogue is empty, {n}. Save a system, base or discovery.'];const x=rnd(n);return['You have '+n.length+(n.length===1?' entry':' entries')+' in your catalogue.',x&&x.name?'Remember '+x.name+'? It is in your catalogue.':'Your catalogue is growing, {n}.'];}
+function pick(){const ks=Object.keys(S.kinds).filter(k=>S.kinds[k]);if(!ks.length)return null;const k=rnd(ks);let pool=k==='live'?liveLines():k==='note'?noteLines():POOL[k];if(!pool||!pool.length)pool=POOL.lore;let t;for(let i=0;i<6;i++){t=rnd(pool);if(!recent.includes(t))break;}recent.push(t);if(recent.length>14)recent.shift();return fill(t);}
+let asleep=false,sleptAt=0,lastSpoke=Date.now(),lastTouch=Date.now(),nextDream=0,lastWake=-1,boot=Date.now();
+function say(){if(asleep||!comp())return;const t=pick();if(t){lastSpoke=Date.now();sentBubble('',t);}}
+function wakeLine(long){if(long)return fill(rnd(LW));let i;do{i=Math.random()*WK.length|0}while(i===lastWake);lastWake=i;return fill(WK[i]);}
+function dream(){nextDream=Date.now()+30000+Math.random()*20000;sentBubble('',Math.random()<.5?'Z z z z z z z z':rnd(TH));}
+function sleep(){if(asleep||!comp())return;asleep=true;sleptAt=Date.now();document.body.classList.add('lsleep');try{window.lsSnd&&window.lsSnd.stop();}catch(e){}dream();}
+function wake(){if(!asleep)return;asleep=false;document.body.classList.remove('lsleep');try{window.lsSnd&&window.lsSnd.start();}catch(e){}lastTouch=lastSpoke=Date.now();sentBubble('',wakeLine(Date.now()-sleptAt>3*36e5));}
+/* reminders */
+const pad2=n=>(n<10?'0':'')+n;
+const dayKey=d=>d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+function remCheck(){const d=new Date(),hm=pad2(d.getHours())+':'+pad2(d.getMinutes()),dk=dayKey(d);
+ S.rem.slice().forEach(r=>{if(r.rep==='wed'&&d.getDay()!==3)return;
+  if(r.rep==='once'){if(dk<r.day||(dk===r.day&&hm<r.time))return;}else if(hm<r.time)return;
+  notify('Reminder',nm()+', you asked me to remind you: '+r.text,'rem-'+r.id+'-'+dk);
+  if(r.rep==='once'){S.rem=S.rem.filter(x=>x.id!==r.id);save();renderRem();}});}
+/* weather (same rules as the Weather app, checked on this computer) */
+const WMO={0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Fog',48:'Freezing fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',66:'Freezing rain',67:'Heavy freezing rain',71:'Light snow',73:'Snow',75:'Heavy snow',77:'Snow grains',80:'Rain showers',81:'Rain showers',82:'Violent showers',85:'Snow showers',86:'Heavy snow showers',95:'Thunderstorm',96:'Thunderstorm with hail',99:'Severe thunderstorm'};
+const isRain=c=>(c>=51&&c<=67)||(c>=80&&c<=82),isSnow=c=>(c>=71&&c<=77)||c===85||c===86,SEV=[65,67,75,82,86,95,96,99];
+const deg=v=>Math.round(v)+'°C';
+async function geocode(q){const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&format=json&name='+encodeURIComponent(q));if(!r.ok)throw 0;const j=await r.json(),g=j.results&&j.results[0];return g?{name:g.name+(g.country?', '+g.country:''),lat:g.latitude,lon:g.longitude}:null;}
+async function wxTick(){const P=prefs;if(!S.place||!(P.rain||P.severe||P.temp||P.daily||P.tomorrow))return;
+ let d;try{const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+S.place.lat+'&longitude='+S.place.lon+'&current=temperature_2m,weather_code,wind_gusts_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=2',{cache:'no-store'});if(!r.ok)return;d=await r.json();}catch(e){return;}
+ const c=d.current,H=d.hourly,D=d.daily,city=S.place.name.split(',')[0],today=c.time.slice(0,10),lh=+c.time.slice(11,13);
+ const i0=H.time.findIndex(t=>t.slice(0,13)===c.time.slice(0,13));if(i0<0)return;
+ const hr=k=>({t:H.temperature_2m[i0+k],code:H.weather_code[i0+k],pop:H.precipitation_probability[i0+k]||0,h:H.time[i0+k]?+H.time[i0+k].slice(11,13):0});
+ if(P.severe){for(let k=0;k<4;k++){const x=hr(k);if(SEV.indexOf(x.code)!==-1){notify('Extreme weather approaching',(WMO[x.code]||'Severe weather')+(k===0?' over '+city+' now.':' expected over '+city+' from '+pad2(x.h)+':00.'),'wx-'+today+'-sev-'+x.code);break;}}
+  if(c.wind_gusts_10m>=70)notify('Gale warning','Gusts up to '+Math.round(c.wind_gusts_10m)+' km/h over '+city+'.','wx-'+today+'-gale');
+  if(c.temperature_2m>=35)notify('Extreme heat',deg(c.temperature_2m)+' over '+city+'. Stay hydrated, '+nm()+'.','wx-'+today+'-heat');
+  if(c.temperature_2m<=-5)notify('Hard frost',deg(c.temperature_2m)+' over '+city+'. Watch for ice.','wx-'+today+'-frost');}
+ const n1=hr(1);if(P.rain&&!isRain(c.weather_code)&&!isSnow(c.weather_code)&&n1.t!==undefined&&(n1.pop>=55||((isRain(n1.code)||isSnow(n1.code))&&n1.pop>=35))){const sn=isSnow(n1.code);notify((sn?'Snow':'Rain')+' starting within the hour',(WMO[n1.code]||(sn?'Snow':'Rain'))+' likely over '+city+' ('+n1.pop+'% chance).','wx-'+today+'-rain-'+n1.h);}
+ const n3=hr(3);if(P.temp&&n3.t!==undefined){const dl=n3.t-c.temperature_2m;if(Math.abs(dl)>=5)notify(dl<0?'Temperature dropping':'Temperature rising','From '+deg(c.temperature_2m)+' to '+deg(n3.t)+' by '+pad2(n3.h)+':00 over '+city+'.','wx-'+today+'-temp-'+n3.h);}
+ if(P.daily&&lh>=7)notify('Morning briefing · '+city,(WMO[D.weather_code[0]]||'')+'. High '+deg(D.temperature_2m_max[0])+', low '+deg(D.temperature_2m_min[0])+'.','wx-'+today+'-daily');
+ if(P.tomorrow&&lh>=18&&D.time[1]){let t=(WMO[D.weather_code[1]]||'Mixed conditions')+'. High '+deg(D.temperature_2m_max[1])+', low '+deg(D.temperature_2m_min[1])+'.';const pp=D.precipitation_probability_max[1];if(pp>=30)t+=' '+pp+'% chance of '+(isSnow(D.weather_code[1])?'snow':'rain')+'.';notify('Tomorrow · '+city,t,'wx-'+today+'-tmrw');}}
+/* the ticker */
+async function tick(){remCheck();if(!comp()||LS.get('nmsc_mute',false))return;
+ let idle;try{idle=await window.nmscBridge.invoke('sys-idle');}catch(e){}if(typeof idle!=='number')idle=(Date.now()-lastTouch)/1000;
+ if(asleep){if(idle<15)wake();else if(Date.now()>nextDream)dream();return;}
+ if(!S.done&&!S.asked&&Date.now()-boot>9000){S.asked=1;save();sentBubble('','Greetings, Traveller. I am Laylaps. Click me, then choose Set me up.');return;}
+ if(S.sleep>0&&idle>=S.sleep*60){sleep();return;}
+ const b=$('#bub');if(S.on&&b&&b.hidden&&Date.now()-lastSpoke>=S.freq*60000&&Date.now()-lastTouch>4000)say();}
+/* settings panel */
+const FREQ=[[2,'OFTEN · 2 MIN'],[5,'NORMAL · 5 MIN'],[15,'RARE · 15 MIN']];
+function sw(el,get,set){el.setAttribute('role','switch');el.tabIndex=0;const dr=()=>el.setAttribute('aria-checked',!!get());dr();const t=()=>{set(!get());save();dr();};el.onclick=t;el.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();t();}};}
+function renderRem(){const w=$('#layRem');if(!w)return;w.innerHTML='';if(!S.rem.length){w.innerHTML='<div class="sub">No reminders.</div>';return;}S.rem.forEach(r=>{const d=document.createElement('div');d.className='rule';const t=document.createElement('div');t.className='t';t.textContent=r.text;const s=document.createElement('small');s.textContent=r.time+' · '+(r.rep==='once'?'Once':r.rep==='daily'?'Every day':'Every Wednesday');t.appendChild(s);const x=document.createElement('button');x.className='btn am';x.textContent='X';x.setAttribute('aria-label','Delete reminder');x.onclick=()=>{S.rem=S.rem.filter(y=>y.id!==r.id);save();renderRem();};d.append(t,x);w.appendChild(d);});}
+function cityMsg(t){const e=$('#layCityMsg');if(e)e.textContent=t;}
+async function setCity(q){q=(q||'').trim();if(!q)return false;cityMsg('Looking up...');try{const g=await geocode(q);if(!g){cityMsg('Not found. Try the city name only.');return false;}S.place=g;save();cityMsg('Place: '+g.name+'. Stays on this computer. Sent only to the weather provider (Open-Meteo) to get the forecast.');wxTick();return true;}catch(e){cityMsg('Could not reach the weather provider. Try again later.');return false;}}
+function sumUpdate(){const e=$('#layPanelSum');if(e)e.textContent=S.on?('EVERY '+S.freq+' MIN'):'OFF';}
+function bind(){const nmI=$('#layName');if(!nmI)return;nmI.value=S.name||'';nmI.onchange=()=>{S.name=nmI.value.trim().slice(0,20);save();};
+ sw($('#layOn'),()=>S.on,v=>{S.on=v;sumUpdate();});
+ ['live','note','lore','tip'].forEach(k=>sw($('#layK-'+k),()=>S.kinds[k],v=>{S.kinds[k]=v?1:0;}));
+ const f=$('#layFreq');f.innerHTML='';FREQ.forEach(([m,l])=>{const b=document.createElement('button');b.className='btn'+(S.freq===m?' am':'');b.textContent=l;b.onclick=()=>{S.freq=m;save();[...f.children].forEach(x=>x.classList.toggle('am',x===b));sumUpdate();};f.appendChild(b);});
+ const sl=$('#laySleep');sl.value=String(S.sleep);sl.onchange=()=>{S.sleep=+sl.value;save();};
+ if(S.place)cityMsg('Place: '+S.place.name+'. Stays on this computer. Sent only to the weather provider (Open-Meteo) to get the forecast.');
+ $('#layCitySet').onclick=()=>setCity($('#layCity').value);$('#layCity').onkeydown=e=>{if(e.key==='Enter')setCity($('#layCity').value);};
+ $('#layRemAdd').onclick=()=>{const t=$('#layRemText').value.trim(),tm=$('#layRemTime').value||'20:00',rep=$('#layRemRep').value;if(!t)return;const d=new Date();let day=dayKey(d);if(rep==='once'&&(pad2(d.getHours())+':'+pad2(d.getMinutes()))>=tm){const n=new Date(d.getTime()+864e5);day=dayKey(n);}S.rem.push({id:Date.now().toString(36),text:t.slice(0,120),time:tm,rep,day});save();$('#layRemText').value='';renderRem();};
+ $('#laySay').onclick=()=>{if(!comp()){cityMsg('Laylaps speaks in floating mode. Use "Laylaps" in the top bar.');return;}say();};
+ $('#laySetup').onclick=()=>wiz('start');renderRem();sumUpdate();}
+function open(){try{tab('alert');}catch(e){}const p=$('#layPanel');if(!p)return;const b=p.querySelector('.collhead');if(b&&b.getAttribute('aria-expanded')!=='true')b.click();p.scrollIntoView({block:'start'});}
+/* first-run setup */
+let W=null;
+function wend(){if(W){W.remove();W=null;}S.done=true;save();bind();}
+function wiz(step){if(!W){W=document.createElement('div');W.id='layWiz';document.body.appendChild(W);}
+ const card=h=>{W.innerHTML='<div class="panel"><div class="kick al">LAYLAPS</div>'+h+'</div>';};
+ const q=s=>W.querySelector(s);
+ if(step==='start'){card('<div class="src">Greetings, Traveller. I am Laylaps. Shall we set me up? It takes a minute and everything stays on this computer.</div><div class="btns"><button class="btn" id="w1">SET UP</button><button class="btn am" id="w0">LATER</button></div>');q('#w1').onclick=()=>wiz(0);q('#w0').onclick=wend;}
+ if(step===0){card('<div class="src">Traveller, what should I call you?</div><input class="inp" id="wn" maxlength="20" placeholder="Leave blank for Traveller" style="text-transform:none"><div class="btns"><button class="btn" id="wx">NEXT</button><button class="btn am" id="ws">SKIP</button></div>');q('#wn').value=S.name||'';q('#wx').onclick=()=>{S.name=q('#wn').value.trim();save();wiz(1);};q('#ws').onclick=()=>wiz(1);}
+ if(step===1){card('<div class="src">How often shall I speak while you work, '+nm()+'?</div><div class="btns" id="wf"></div><div class="btns"><button class="btn" id="wx">NEXT</button></div>');const f=q('#wf');FREQ.forEach(([m,l])=>{const b=document.createElement('button');b.className='btn'+(S.freq===m?' am':'');b.textContent=l;b.onclick=()=>{S.freq=m;save();[...f.children].forEach(x=>x.classList.toggle('am',x===b));};f.appendChild(b);});q('#wx').onclick=()=>wiz(2);}
+ if(step===2){card('<div class="src">Which alerts shall I raise, '+nm()+'?</div><label class="rule"><div class="t">Expeditions and update day</div><input type="checkbox" id="wa" checked></label><label class="rule"><div class="t">Weather alerts<small>Needs your place</small></div><input type="checkbox" id="ww"></label><div class="btns"><button class="btn" id="wx">NEXT</button></div>');
+  q('#wx').onclick=()=>{const a=q('#wa').checked,w=q('#ww').checked;['newExp','end24','end1','wed'].forEach(k=>prefs[k]=a);['rain','severe','temp'].forEach(k=>prefs[k]=w);LS.set('nmsc_rules',prefs);renderRules();wiz(w?3:4);};}
+ if(step===3){card('<div class="src">Where are you, '+nm()+'? Only for the weather.</div><input class="inp" id="wc" placeholder="City" style="text-transform:none"><div class="src" id="wm">Stays on this computer. Sent only to the weather provider (Open-Meteo) for the forecast.</div><div class="btns"><button class="btn" id="wx">FINISH</button><button class="btn am" id="ws">SKIP</button></div>');
+  q('#wx').onclick=async()=>{const v=q('#wc').value.trim();if(!v){wiz(4);return;}q('#wm').textContent='Looking up...';const g=await geocode(v).catch(()=>null);if(!g){q('#wm').textContent='Not found. Try the city name only, or Skip.';return;}S.place=g;save();wxTick();wiz(4);};q('#ws').onclick=()=>wiz(4);}
+ if(step===4){card('<div class="src">All set, '+nm()+'. I shall keep watch. You can change anything under Alerts, LAYLAPS SETUP.</div><div class="btns"><button class="btn" id="wx">DONE</button></div>');q('#wx').onclick=wend;}}
+/* what's new after an update */
+const NEWS=["Laylaps now chats while he waits: expedition news, update day, lore and tips.","He has a name for you. Set it under Alerts, Laylaps.","Laylaps falls asleep when you are away and wakes with a dream.","Weather alerts for your place (rain, severe weather, temperature, briefings).","Reminders: ask Laylaps to remind you of anything."];
+function whatsNew(ver){if(!ver)return;const seen=LS.get('nmsc_seenver',null);LS.set('nmsc_seenver',ver);if(!seen||seen===ver)return;
+ const w=document.createElement('div');w.id='layWiz';const p=document.createElement('div');p.className='panel';p.innerHTML='<div class="kick al">UPDATED TO v'+ver.replace(/[^0-9.]/g,'')+'</div><div class="src">What is new:</div>';
+ const ul=document.createElement('ul');ul.style.cssText='margin:8px 0 0 18px;padding:0;font-size:14px;line-height:1.4';NEWS.forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.appendChild(li);});p.appendChild(ul);
+ const bt=document.createElement('div');bt.className='btns';const b=document.createElement('button');b.className='btn';b.textContent='GOT IT';b.onclick=()=>w.remove();bt.appendChild(b);p.appendChild(bt);w.appendChild(p);document.body.appendChild(w);}
+function init(){bind();renderRem();
+ setInterval(tick,20000);setInterval(wxTick,30*60000);setTimeout(wxTick,25000);setTimeout(tick,3000);
+ if(LS.get('nmsc_openlay',false)){const v=LS.get('nmsc_openlay',false);LS.set('nmsc_openlay',false);setTimeout(()=>{if(v==='wiz')wiz('start');else open();},900);}
+ else setTimeout(()=>{if(window.NMSC_STANDALONE&&!S.done&&!comp()&&!W)wiz('start');},4000);}
+return{whatsNew,init,say,sleep,wake,open,touch:()=>{lastTouch=Date.now();},asleep:()=>asleep,setupDone:()=>S.done};
+})();
+
 $('#bTest').onclick=()=>notify('Test alert','This is how an alert will look on your desktop.',null);
 
 /* desktop features */
@@ -553,6 +682,7 @@ function trayMenu(){return[
  {label:'Open NMS Companion',click:()=>desktop.window.show()},
  {label:'Portal dialer  (Alt+Shift+P)',click:()=>{tab('dial');desktop.window.show();}},
  {label:'Ask the Atlas  (Alt+Shift+A)',click:()=>openAtlas()},
+ {label:'Laylaps setup...',click:()=>{desktop.window.show();LAY.open();}},
  {label:'Refresh expedition',click:()=>load(true)}];}
 async function toggleDialer(){try{if(document.visibilityState==='visible'&&document.hasFocus()){await desktop.window.hide();}else{tab('dial');await desktop.window.show();}}catch(e){}}
 function updateTray(){if(!desktop?.tray||!data.live)return;const left=data.live.end-nowMs();if(left<=0)return;const d=Math.floor(left/864e5),h=Math.floor(left/36e5)%24;
@@ -701,7 +831,7 @@ setInterval(()=>{checks();},30000);
 setInterval(()=>{const u=ukParts();if(u.wd==='Wed'&&u.h>=13&&u.h<=19)load(false);},600000);
 setInterval(()=>load(false),3*3600000);
 setInterval(updateTray,60000);
-renderRules();renderRecent();renderDial();renderExp();renderLog();
+renderRules();renderRecent();renderDial();renderExp();renderLog();LAY.init();
 (async()=>{
  try{desktop=await (window.claude?.use?.('desktop'))||null;}catch(e){desktop=null;}
  const b=$('#banner');
@@ -742,7 +872,7 @@ renderRules();renderRecent();renderDial();renderExp();renderLog();
    const nextSwap=()=>{clearTimeout(tSwap);if(running)tSwap=setTimeout(()=>{const o=cur===hA?hB:hA;fade(cur,0,3000);cur=o;try{o.currentTime=0;o.play().catch(()=>{});}catch(e){}fade(o,HV,3000);nextSwap();},rnd(90000,150000));};
    const startSnd=()=>{if(running||!SND.on()||!vis)return;running=true;try{cur.play().catch(()=>{});}catch(e){}fade(cur,HV,1500);nextSwap();nextBeep();};
    const stopSnd=()=>{running=false;clearTimeout(tSwap);clearTimeout(tBeep);fade(hA,0,500);fade(hB,0,500);};
-   window.lsBeep=()=>beep();
+   window.lsBeep=()=>beep();window.lsSnd={start:()=>startSnd(),stop:()=>stopSnd()};
    window.nmscBridge.on('win-vis',v=>{vis=!!v;if(vis)startSnd();else stopSnd();});
    window.addEventListener('beforeunload',()=>{try{hA.pause();hB.pause();}catch(e){}});
    startSnd();
@@ -757,7 +887,7 @@ renderRules();renderRecent();renderDial();renderExp();renderLog();
      ...(window.__nmscUpd?[{label:'Update now (v'+window.__nmscUpd.latest+')',click:()=>{try{window.nmscBridge.invoke('app-download');}catch(e){}sentBubble('Updating','Downloading the update. The installer opens when it is ready.');}},{type:'separator'}]:[]),
      {label:'Expedition',click:()=>openView('exp')},{label:'Dialer',click:()=>openView('dial')},{label:'Atlas',click:()=>openView('atlas')},{label:'Catalogue',click:()=>openView('note')},{type:'separator'},
      {label:'Size: Small',type:'radio',checked:csz==='s',click:()=>applySize('s')},{label:'Size: Medium',type:'radio',checked:csz==='m',click:()=>applySize('m')},{label:'Size: Large',type:'radio',checked:csz==='l',click:()=>applySize('l')},{type:'separator'},
-     {label:'Show a test alert',click:()=>sentBubble('Expedition alert','Aquarius ends in under 24 hours.')},{label:'Laylaps sounds',type:'checkbox',checked:SND.on(),click:()=>{LS.set('nmsc_lsound',!SND.on());if(SND.on())startSnd();else stopSnd();}},{label:'Alerts on',type:'checkbox',checked:!LS.get('nmsc_mute',false),click:()=>LS.set('nmsc_mute',!LS.get('nmsc_mute',false))},{type:'separator'},
+     {label:'Laylaps setup...',click:()=>{LS.set('nmsc_openlay',true);setMode('full');}},{label:'Show a test alert',click:()=>sentBubble('Expedition alert','Aquarius ends in under 24 hours.')},{label:'Laylaps sounds',type:'checkbox',checked:SND.on(),click:()=>{LS.set('nmsc_lsound',!SND.on());if(SND.on())startSnd();else stopSnd();}},{label:'Alerts on',type:'checkbox',checked:!LS.get('nmsc_mute',false),click:()=>LS.set('nmsc_mute',!LS.get('nmsc_mute',false))},{type:'separator'},
      {label:'Full window',click:()=>setMode('full')},{label:'Hide',click:()=>desktop.window.hide()}]);}catch(e){}};
    // the picture is the drag handle: manual drag so a plain click still opens the menu
    const sw=$('#sw');let dg=null;
@@ -768,7 +898,7 @@ renderRules();renderRecent();renderDial();renderExp();renderLog();
    refresh().catch(()=>{});
    sw.addEventListener('pointerdown',e=>{if(e.button!==0)return;dg={sx:e.screenX,sy:e.screenY,b:cb,moved:false,last:0};try{sw.setPointerCapture(e.pointerId);}catch(x){}
     refresh().then(x=>{if(dg&&!dg.moved)dg.b=x;}).catch(()=>{});});
-   sw.addEventListener('lostpointercapture',()=>{if(dg){const d=dg;dg=null;sw.classList.remove('drag');if(!d.moved)menu();}});
+   sw.addEventListener('lostpointercapture',()=>{if(dg){const d=dg;dg=null;sw.classList.remove('drag');if(!d.moved){LAY.touch();if(LAY.asleep())LAY.wake();else menu();}}});
    window.addEventListener('blur',()=>{dg=null;sw.classList.remove('drag');});
    sw.addEventListener('pointermove',e=>{if(!dg)return;const dx=e.screenX-dg.sx,dy=e.screenY-dg.sy;
     if(!dg.moved&&Math.hypot(dx,dy)<5)return;
@@ -776,7 +906,7 @@ renderRules();renderRecent();renderDial();renderExp();renderLog();
     // move by the change since the last applied step, from the CURRENT window size (the speech bubble can grow or shrink the window mid-drag)
     if(cb){const n=performance.now();if(n-dg.last<16)return;dg.last=n;const nx=Math.round(cb.x+(e.screenX-dg.px)),ny=Math.round(cb.y+(e.screenY-dg.py));dg.px=e.screenX;dg.py=e.screenY;
      cb={x:nx,y:ny,width:cb.width,height:cb.height};try{desktop.window.setBounds(cb).catch(()=>refresh().catch(()=>{}));}catch(x){}face(nx+cb.width/2);}});
-   const end=e=>{if(!dg)return;const d=dg;dg=null;sw.classList.remove('drag');try{sw.releasePointerCapture(e.pointerId);}catch(x){}if(!d.moved)menu();};
+   const end=e=>{if(!dg)return;const d=dg;dg=null;sw.classList.remove('drag');try{sw.releasePointerCapture(e.pointerId);}catch(x){}if(!d.moved){LAY.touch();if(LAY.asleep())LAY.wake();else menu();}};
    sw.addEventListener('pointerup',end);sw.addEventListener('pointercancel',end);}
   else{
    await applyOpt('full');

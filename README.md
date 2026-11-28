@@ -35,7 +35,10 @@ See the Releases page. The app is not code-signed, so Windows may show "unknown 
 Built by elegra1965. No Man's Sky, its names, pictures and sounds belong to Hello Games. This is an unofficial fan project, not affiliated with or endorsed by Hello Games. The Atlas and Laylaps artwork is used as fan art with credit to Hello Games. Data: Voyager's Haven, NMS Almanac, nomanssky.com posts.
 
 ## Privacy
-The app sends nothing about you anywhere. It only contacts: map.nomansskyhub.app (expedition schedule, read only), nomanssky.com (official news), api.github.com (checks for a newer version and downloads updates), and, only if you add your own key, api.anthropic.com (your Atlas questions). No accounts, no analytics, no tracking. Your catalogue, settings and key stay on your computer.
+The app sends nothing about you anywhere. It only contacts: map.nomansskyhub.app (expedition schedule, read only), nomanssky.com (official news), api.github.com (checks for a newer version and downloads updates), and, only if you add your own key, api.anthropic.com (your Atlas questions). If you turn on Laylaps weather alerts and type a city, that city is sent to open-meteo.com (geocoding and forecast) and nowhere else. Your name, city and reminders are stored only on your computer. No accounts, no analytics, no tracking. Your catalogue, settings and key stay on your computer.
+
+## Laylaps
+The floating sentinel chats while you wait (expedition news, update day, NMS lore, tips), uses the name you give him, falls asleep when you are away (and wakes with a dream), raises weather alerts for your city and keeps reminders. Set up under Alerts, Laylaps, or click him and choose Laylaps setup. A what's-new card shows once after each update.
 
 ## Code signing policy
 Free code signing provided by [SignPath.io](https://signpath.io), certificate by [SignPath Foundation](https://signpath.org) (application pending; releases are unsigned until approved).
