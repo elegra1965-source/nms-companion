@@ -66,11 +66,11 @@ ipcMain.handle('app-download',async(e)=>{
   if(process.platform==='win32'&&app.isPackaged&&!process.env.PORTABLE_EXECUTABLE_DIR){
     try{const {autoUpdater}=require('electron-updater');autoUpdater.autoDownload=false;autoUpdater.autoInstallOnAppQuit=false;
       autoUpdater.removeAllListeners();
-      autoUpdater.on('download-progress',p=>send('Downloading '+Math.round(p.percent)+'%'));
+      const t0=Date.now();autoUpdater.on('download-progress',p=>send(Date.now()-t0>4000?'Downloading '+Math.round(p.percent)+'%':'Downloading...'));
       autoUpdater.on('update-downloaded',inf=>{try{fs.writeFileSync(pendF(),JSON.stringify({to:inf&&inf.version,at:Date.now()}));}catch(_){}send('Opening the installer, click through it to finish...');setTimeout(()=>{app.quitting=true;autoUpdater.quitAndInstall(false,true);},4000);});
       autoUpdater.on('error',er=>{try{fs.appendFileSync(path.join(app.getPath('documents'),'NMS Companion','update.log'),new Date().toISOString()+' '+String(er&&er.stack||er)+'\n');}catch(_){}send('Update failed, opening the download instead.');shell.openExternal(REL+dlName());});
       const r=await autoUpdater.checkForUpdates();if(!r||!r.updateInfo){shell.openExternal(REL+dlName());return true;}
-      send('Downloading 0%');await autoUpdater.downloadUpdate();return true;
+      send('Downloading...');await autoUpdater.downloadUpdate();return true;
     }catch(err){send('Update failed, opening the download instead.');}
   }
   shell.openExternal(REL+dlName());return true;});
