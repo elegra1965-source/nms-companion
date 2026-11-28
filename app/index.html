@@ -218,6 +218,7 @@ body.comp>*:not(#comp):not(script){display:none!important}
 .emp{position:relative;margin:12px 0;aspect-ratio:16/9;min-height:150px;border:1px solid var(--line);background:repeating-linear-gradient(0deg,rgba(53,208,224,.05) 0 2px,transparent 2px 5px),#070d15;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:12px}.emp i{position:absolute;width:12px;height:12px;border:2px solid var(--cy)}.emp i:nth-child(1){left:6px;top:6px;border-right:0;border-bottom:0}.emp i:nth-child(2){right:6px;top:6px;border-left:0;border-bottom:0}.emp i:nth-child(3){left:6px;bottom:6px;border-right:0;border-top:0}.emp i:nth-child(4){right:6px;bottom:6px;border-left:0;border-top:0}.emp .ei{width:44px;height:44px;background:center/contain no-repeat;opacity:.8}.emp b{font:700 12px Orbitron,sans-serif;letter-spacing:.16em;color:var(--am)}.emp span{font:500 14px Rajdhani,sans-serif;color:var(--mu,#8aa);max-width:260px}
 #layWiz{position:fixed;inset:0;z-index:50;background:rgba(3,7,12,.88);display:flex;align-items:center;justify-content:center;padding:14px}#layWiz .panel{max-width:420px;width:100%}
 body.lsleep #sent{opacity:.55;filter:saturate(.6)}.sw[aria-checked=true]{}
+body.bubbelow #comp{justify-content:flex-start;padding-top:4px}body.bubbelow #bub{top:auto;bottom:6px}
 </style>
 </head>
 <body>
@@ -337,7 +338,7 @@ body.lsleep #sent{opacity:.55;filter:saturate(.6)}.sw[aria-checked=true]{}
   </section>
 
   <section id="t-alert" hidden><div class="agrid">
-    <div class="panel">
+    <div class="panel" data-fold data-sum="">
       <div class="kick al">NOTIFICATIONS</div>
       <div id="rules"></div>
       <div class="rule" id="topRow" hidden><div class="t">Keep window on top<small>Stays above other windows. Reloads the window once.</small></div><div class="sw" id="topSw" role="switch" tabindex="0" aria-label="Keep window on top"></div></div>
@@ -349,10 +350,10 @@ body.lsleep #sent{opacity:.55;filter:saturate(.6)}.sw[aria-checked=true]{}
       <div class="rule"><div class="t">Speak while I wait<small>Lines about expeditions, lore and tips</small></div><div class="sw" id="layOn" aria-label="Laylaps speaks"></div></div>
       <div class="fld"><label for="layName">WHAT SHOULD LAYLAPS CALL YOU?</label><input class="inp" id="layName" maxlength="20" placeholder="Leave blank for Traveller" style="text-transform:none"></div>
       <div class="fld"><label>HOW OFTEN</label><div class="btns" id="layFreq"></div></div>
-      <div class="rule"><div class="t">Live news</div><div class="sw" id="layK-live" aria-label="Live news lines"></div></div>
+      <div class="rule"><div class="t">NMS news</div><div class="sw" id="layK-live" aria-label="NMS news lines"></div></div>
       <div class="rule"><div class="t">Catalogue nudges</div><div class="sw" id="layK-note" aria-label="Catalogue lines"></div></div>
       <div class="rule"><div class="t">NMS lore and chatter</div><div class="sw" id="layK-lore" aria-label="Lore lines"></div></div>
-      <div class="rule"><div class="t">Tips</div><div class="sw" id="layK-tip" aria-label="Tip lines"></div></div>
+      <div class="rule"><div class="t">NMS tips</div><div class="sw" id="layK-tip" aria-label="NMS tip lines"></div></div>
       <div class="fld"><label for="laySleep">FALL ASLEEP WHEN I AM AWAY</label><select class="inp" id="laySleep"><option value="15">After 15 min</option><option value="30">After 30 min</option><option value="60">After 1 hour</option><option value="0">Never</option></select></div>
       <div class="fld"><label for="layCity">WEATHER PLACE</label><div class="btns" style="margin-top:0"><input class="inp" id="layCity" placeholder="City, postcode or country" style="text-transform:none;flex:1"><button class="btn" id="layCitySet">SET</button></div><div class="src" id="layCityMsg">Used only for weather alerts. Stays on this computer.</div></div>
       <div class="fld"><label>REMINDERS</label><div id="layRem"></div><input class="inp" id="layRemText" maxlength="120" placeholder="Remind me to..." style="text-transform:none;margin-top:6px"><div class="btns"><input type="time" class="inp" id="layRemTime" value="20:00" style="width:auto"><select class="inp" id="layRemRep" style="width:auto"><option value="once">Once</option><option value="daily">Every day</option><option value="d1">Every Monday</option><option value="d2">Every Tuesday</option><option value="d3">Every Wednesday</option><option value="d4">Every Thursday</option><option value="d5">Every Friday</option><option value="d6">Every Saturday</option><option value="d0">Every Sunday</option></select><button class="btn" id="layRemAdd">ADD</button></div></div>
@@ -582,11 +583,12 @@ function liveLines(){const o=[],l=data&&data.live;
  return o;}
 function noteLines(){const n=(typeof notes!=='undefined'&&notes)||[];if(!n.length)return['Your catalogue is empty, {n}. Save a system, base or discovery.'];const x=rnd(n);return['You have '+n.length+(n.length===1?' entry':' entries')+' in your catalogue.',x&&x.name?'Remember '+x.name+'? It is in your catalogue.':'Your catalogue is growing, {n}.'];}
 function pick(){const ks=Object.keys(S.kinds).filter(k=>S.kinds[k]);if(!ks.length)return null;const k=rnd(ks);let pool=k==='live'?liveLines():k==='note'?noteLines():POOL[k];if(!pool||!pool.length)pool=POOL.lore;let t;for(let i=0;i<6;i++){t=rnd(pool);if(!recent.includes(t))break;}recent.push(t);if(recent.length>14)recent.shift();return fill(t);}
+let gapMs=0,manual=false;const newGap=()=>{gapMs=30000+Math.random()*870000;};newGap();const gap=()=>S.freq==='r'?gapMs:S.freq*60000;
 let asleep=false,sleptAt=0,lastSpoke=Date.now(),lastTouch=Date.now(),nextDream=0,lastWake=-1,boot=Date.now();
-function say(){if(asleep||!comp())return;const t=pick();if(t){lastSpoke=Date.now();sentBubble('',t);}}
+function say(){if(asleep||!comp())return;const t=pick();if(t){lastSpoke=Date.now();newGap();sentBubble('',t);}}
 function wakeLine(long){if(long)return fill(rnd(LW));let i;do{i=Math.random()*WK.length|0}while(i===lastWake);lastWake=i;return fill(WK[i]);}
 function dream(){nextDream=Date.now()+30000+Math.random()*20000;sentBubble('',Math.random()<.5?'Z z z z z z z z':rnd(TH));}
-function sleep(){if(asleep||!comp())return;asleep=true;sleptAt=Date.now();document.body.classList.add('lsleep');try{window.lsSnd&&window.lsSnd.stop();}catch(e){}dream();}
+function sleep(man){if(asleep||!comp())return;asleep=true;manual=!!man;sleptAt=Date.now();document.body.classList.add('lsleep');try{window.lsSnd&&window.lsSnd.stop();}catch(e){}dream();}
 function wake(){if(!asleep)return;asleep=false;document.body.classList.remove('lsleep');try{window.lsSnd&&window.lsSnd.start();}catch(e){}lastTouch=lastSpoke=Date.now();sentBubble('',wakeLine(Date.now()-sleptAt>3*36e5));}
 /* reminders */
 const pad2=n=>(n<10?'0':'')+n;
@@ -620,17 +622,17 @@ async function wxTick(){const P=prefs;if(!S.place||!(P.rain||P.severe||P.temp||P
 /* the ticker */
 async function tick(){remCheck();if(!comp()||LS.get('nmsc_mute',false))return;
  let idle;try{idle=await window.nmscBridge.invoke('sys-idle');}catch(e){}if(typeof idle!=='number')idle=(Date.now()-lastTouch)/1000;
- if(asleep){if(idle<15)wake();else if(Date.now()>nextDream)dream();return;}
+ if(asleep){if(!manual&&idle<15)wake();else if(Date.now()>nextDream)dream();return;}
  if(!S.done&&!S.asked&&Date.now()-boot>9000){S.asked=1;save();sentBubble('','Greetings, Traveller. I am Laylaps. Click me, then choose Set me up.');return;}
  if(S.sleep>0&&idle>=S.sleep*60){sleep();return;}
- const b=$('#bub');if(S.on&&b&&b.hidden&&Date.now()-lastSpoke>=S.freq*60000&&Date.now()-lastTouch>4000)say();}
+ const b=$('#bub');if(S.on&&b&&b.hidden&&Date.now()-lastSpoke>=gap()&&Date.now()-lastTouch>4000)say();}
 /* settings panel */
-const FREQ=[[2,'OFTEN · 2 MIN'],[5,'NORMAL · 5 MIN'],[15,'RARE · 15 MIN']];
+const FREQ=[[0.5,'30 SEC'],[1,'1 MIN'],[2,'OFTEN · 2 MIN'],[5,'NORMAL · 5 MIN'],[15,'RARE · 15 MIN'],['r','RANDOM · 30 SEC TO 15 MIN']];
 function sw(el,get,set){el.setAttribute('role','switch');el.tabIndex=0;const dr=()=>el.setAttribute('aria-checked',!!get());dr();const t=()=>{set(!get());save();dr();};el.onclick=t;el.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();t();}};}
 function renderRem(){const w=$('#layRem');if(!w)return;w.innerHTML='';if(!S.rem.length){w.innerHTML='<div class="sub">No reminders.</div>';return;}S.rem.forEach(r=>{const d=document.createElement('div');d.className='rule';const t=document.createElement('div');t.className='t';t.textContent=r.text;const s=document.createElement('small');s.textContent=r.time+' · '+(r.rep==='once'?'Once':r.rep==='daily'?'Every day':'Every '+['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][+(r.rep==='wed'?3:r.rep[1])]);t.appendChild(s);const x=document.createElement('button');x.className='btn am';x.textContent='X';x.setAttribute('aria-label','Delete reminder');x.onclick=()=>{S.rem=S.rem.filter(y=>y.id!==r.id);save();renderRem();};d.append(t,x);w.appendChild(d);});}
 function cityMsg(t){const e=$('#layCityMsg');if(e)e.textContent=t;}
 async function setCity(q){q=(q||'').trim();if(!q)return false;cityMsg('Looking up...');try{const g=await geocode(q);if(!g){cityMsg('Not found. Try a city, a postcode or add the country.');return false;}S.place=g;save();cityMsg('Place: '+g.name+'. Stays on this computer. Sent only to OpenStreetMap (to find it) and Open-Meteo (the forecast).');wxTick();return true;}catch(e){cityMsg('Could not reach the weather provider. Try again later.');return false;}}
-function sumUpdate(){const e=$('#layPanelSum');if(e)e.textContent=S.on?('EVERY '+S.freq+' MIN'):'OFF';}
+function sumUpdate(){const e=$('#layPanelSum');if(e)e.textContent=S.on?(S.freq==='r'?'RANDOM':S.freq<1?'EVERY 30 SEC':'EVERY '+S.freq+' MIN'):'OFF';}
 function bind(){const nmI=$('#layName');if(!nmI)return;nmI.value=S.name||'';nmI.onchange=()=>{S.name=nmI.value.trim().slice(0,20);save();};
  sw($('#layOn'),()=>S.on,v=>{S.on=v;sumUpdate();});
  ['live','note','lore','tip'].forEach(k=>sw($('#layK-'+k),()=>S.kinds[k],v=>{S.kinds[k]=v?1:0;}));
@@ -662,11 +664,11 @@ function whatsNew(ver){if(!ver)return;const seen=LS.get('nmsc_seenver',null);LS.
  const w=document.createElement('div');w.id='layWiz';const p=document.createElement('div');p.className='panel';p.innerHTML='<div class="kick al">UPDATED TO v'+ver.replace(/[^0-9.]/g,'')+'</div><div class="src">What is new:</div>';
  const ul=document.createElement('ul');ul.style.cssText='margin:8px 0 0 18px;padding:0;font-size:14px;line-height:1.4';NEWS.forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.appendChild(li);});p.appendChild(ul);
  const bt=document.createElement('div');bt.className='btns';const b=document.createElement('button');b.className='btn';b.textContent='GOT IT';b.onclick=()=>w.remove();bt.appendChild(b);p.appendChild(bt);w.appendChild(p);document.body.appendChild(w);}
-function init(){bind();renderRem();
+function init(){bind();renderRem();setTimeout(sumUpdate,150);
  setInterval(tick,20000);setInterval(wxTick,30*60000);setTimeout(wxTick,25000);setTimeout(tick,3000);
  if(LS.get('nmsc_openlay',false)){const v=LS.get('nmsc_openlay',false);LS.set('nmsc_openlay',false);setTimeout(()=>{if(v==='wiz')wiz('start');else open();},900);}
  else setTimeout(()=>{if(window.NMSC_STANDALONE&&!S.done&&!comp()&&!W)wiz('start');},4000);}
-return{whatsNew,init,say,sleep,wake,open,touch:()=>{lastTouch=Date.now();},asleep:()=>asleep,setupDone:()=>S.done};
+return{whatsNew,init,say,sleep,sleepNow:()=>sleep(true),wake,open,touch:()=>{lastTouch=Date.now();},asleep:()=>asleep,setupDone:()=>S.done};
 })();
 
 $('#bTest').onclick=()=>notify('Test alert','This is how an alert will look on your desktop.',null);
@@ -882,15 +884,15 @@ renderRules();renderRecent();renderDial();renderExp();renderLog();LAY.init();
    const openView=async v=>{localStorage.setItem('nmsc_mview',v);await setMode('float');};
    const applySize=async z=>{csz=z;localStorage.setItem('nmsc_csize',z);document.documentElement.style.setProperty('--cs',CS[z].i+'px');grown=false;try{await desktop.window.place({width:CS[z].w,height:CS[z].h});}catch(e){}if(window.compSet)window.compSet(null);};
    document.documentElement.style.setProperty('--cs',CS[csz].i+'px');
-   let grown=false;
+   let grown=false,belowM=false;
    window.compGrow=async on=>{if(on===grown)return;let b;try{b=await desktop.window.getBounds();}catch(e){return;}
     const z=CS[csz],nw=on?Math.max(z.w,BW):z.w,nh=on?z.h+BH:z.h;
-    const nb={x:Math.round(b.x+(b.width-nw)/2),y:b.y-(nh-b.height),width:nw,height:nh};try{await desktop.window.setBounds(nb);grown=on;if(window.compSet)window.compSet(nb);}catch(e){}};
+    if(on)belowM=(b.y-(nh-b.height))<(window.screen.availTop||0);const al=window.screen.availLeft||0;let nx=Math.round(b.x+(b.width-nw)/2);nx=Math.max(al,Math.min(nx,al+window.screen.availWidth-nw));const nb={x:nx,y:belowM?b.y:b.y-(nh-b.height),width:nw,height:nh};document.body.classList.toggle('bubbelow',on&&belowM);try{await desktop.window.setBounds(nb);grown=on;if(window.compSet)window.compSet(nb);}catch(e){}};
    const menu=async()=>{try{await desktop.Menu.popup([
      ...(window.__nmscUpd?[{label:'Update now (v'+window.__nmscUpd.latest+')',click:()=>{try{window.nmscBridge.invoke('app-download');}catch(e){}sentBubble('Updating','Downloading the update. The installer opens when it is ready.');}},{type:'separator'}]:[]),
      {label:'Expedition',click:()=>openView('exp')},{label:'Dialer',click:()=>openView('dial')},{label:'Atlas',click:()=>openView('atlas')},{label:'Catalogue',click:()=>openView('note')},{type:'separator'},
      {label:'Size: Small',type:'radio',checked:csz==='s',click:()=>applySize('s')},{label:'Size: Medium',type:'radio',checked:csz==='m',click:()=>applySize('m')},{label:'Size: Large',type:'radio',checked:csz==='l',click:()=>applySize('l')},{type:'separator'},
-     {label:'Laylaps setup...',click:()=>{LS.set('nmsc_openlay',true);setMode('full');}},{label:'Show a test alert',click:()=>sentBubble('Expedition alert','Aquarius ends in under 24 hours.')},{label:'Laylaps sounds',type:'checkbox',checked:SND.on(),click:()=>{LS.set('nmsc_lsound',!SND.on());if(SND.on())startSnd();else stopSnd();}},{label:'Alerts on',type:'checkbox',checked:!LS.get('nmsc_mute',false),click:()=>LS.set('nmsc_mute',!LS.get('nmsc_mute',false))},{type:'separator'},
+     {label:'Put Laylaps to sleep',click:()=>LAY.sleepNow()},{label:'Laylaps setup...',click:()=>{LS.set('nmsc_openlay',true);setMode('full');}},{label:'Show a test alert',click:()=>sentBubble('Expedition alert','Aquarius ends in under 24 hours.')},{label:'Laylaps sounds',type:'checkbox',checked:SND.on(),click:()=>{LS.set('nmsc_lsound',!SND.on());if(SND.on())startSnd();else stopSnd();}},{label:'Alerts on',type:'checkbox',checked:!LS.get('nmsc_mute',false),click:()=>LS.set('nmsc_mute',!LS.get('nmsc_mute',false))},{type:'separator'},
      {label:'Full window',click:()=>setMode('full')},{label:'Hide',click:()=>desktop.window.hide()}]);}catch(e){}};
    // the picture is the drag handle: manual drag so a plain click still opens the menu
    const sw=$('#sw');let dg=null;
